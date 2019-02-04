@@ -37,6 +37,7 @@
 
 #define _GNU_SOURCE
 
+
 #include "rdp_plugin.h"
 #include "rdp_event.h"
 #include "rdp_graphics.h"
@@ -44,6 +45,8 @@
 #include "rdp_settings.h"
 #include "rdp_cliprdr.h"
 #include "rdp_channels.h"
+#include "rdp_cliprdr_download_files.h"
+
 
 #include <errno.h>
 #include <pthread.h>
@@ -139,6 +142,11 @@ static BOOL rf_process_event_queue(RemminaProtocolWidget *gp)
 		case REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FORMAT_DATA_REQUEST:
 			rfi->clipboard.context->ClientFormatDataRequest(rfi->clipboard.context, event->clipboard_formatdatarequest.pFormatDataRequest);
 			free(event->clipboard_formatdatarequest.pFormatDataRequest);
+			break;
+
+		case REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FILE_CONTENTS_REQUEST:
+			rfi->clipboard.context->ClientFileContentsRequest(rfi->clipboard.context, event->clipboard_filecontentsrequest.pFileContentsRequest);
+			free(event->clipboard_filecontentsrequest.pFileContentsRequest);
 			break;
 
 		case REMMINA_RDP_EVENT_TYPE_SEND_MONITOR_LAYOUT:
@@ -787,8 +795,11 @@ static void remmina_rdp_main_loop(RemminaProtocolWidget *gp)
 			break;
 		}
 	}
+
+	rdp_cliprdr_download_abort(&rfi->clipboard);
 	freerdp_disconnect(rfi->instance);
 	g_debug("RDP client disconnected\n");
+
 }
 
 int remmina_rdp_load_static_channel_addin(rdpChannels *channels, rdpSettings *settings, char *name, void *data)
@@ -2004,6 +2015,7 @@ static const RemminaProtocolFeature remmina_rdp_features[] =
 	{ REMMINA_PROTOCOL_FEATURE_TYPE_TOOL,	      REMMINA_RDP_FEATURE_TOOL_SENDCTRLALTDEL, N_("Send Ctrl+Alt+Delete"), NULL, NULL },
 	{ REMMINA_PROTOCOL_FEATURE_TYPE_UNFOCUS,      REMMINA_RDP_FEATURE_UNFOCUS,	       NULL,			   NULL, NULL },
 	{ REMMINA_PROTOCOL_FEATURE_TYPE_END,	      0,				       NULL,			   NULL, NULL }
+
 };
 
 /* This will be filled with version info string */
@@ -2029,7 +2041,9 @@ static RemminaProtocolPlugin remmina_rdp =
 	remmina_rdp_query_feature,                      // Query for available features
 	remmina_rdp_call_feature,                       // Call a feature
 	remmina_rdp_keystroke,                          // Send a keystroke
-	remmina_rdp_get_screenshot                      // Screenshot
+	remmina_rdp_get_screenshot,                     // Screenshot
+	remmina_rdp_cliprdr_retrieve_remote_clipboard_files,
+	remmina_rdp_cliprdr_stop_clipboard_transfer
 };
 
 /* File plugin definition and features */

@@ -67,19 +67,64 @@ typedef struct rf_context rfContext;
 
 extern RemminaPluginService *remmina_plugin_service;
 
+/* An object to track file transfer from server (paste) status,
+ *  */
+enum { SEM_FORMAT_DATA_RESPONSE_ARRIVED, SEM_FORMAT_DATA_RESPONSE_RC_READY,
+	SEM_FILE_CONTENTS_REQUEST_ARRIVED, SEM_FILE_CONTENTS_REQUEST_RC_READY,
+	SEM_MAX};
+struct rf_filepastetracker {
+	/* File transfer (from server) operations */
+
+	char *destdir;
+
+	pthread_t paste_thread;
+
+	pthread_mutex_t sem_mutex;
+	pthread_cond_t sem_cond[SEM_MAX];
+	int tokens[SEM_MAX];
+
+	int abort_requested;
+
+	const CLIPRDR_FORMAT_DATA_RESPONSE* formatDataResponse;
+	UINT32 formatDataResponse_result;
+
+	const CLIPRDR_FILE_CONTENTS_RESPONSE* fileContentsResponse;
+	UINT32 fileContentsResponse_result;
+
+	GCancellable* cancellable;
+
+};
+typedef struct rf_filepastetracker rfFilePasteTracker;
+
+// https://docs.microsoft.com/en-us/windows/desktop/api/shlobj_core/ns-shlobj_core-filegroupdescriptorw
+typedef struct _FILEGROUPDESCRIPTOR {
+  UINT            cItems;
+  FILEDESCRIPTOR fgd[1];
+} FILEGROUPDESCRIPTOR;
+
 struct rf_clipboard {
 	rfContext *		rfi;
 	CliprdrClientContext *	context;
 	wClipboard *		system;
+	wClipboardDelegate* delegate;
 	int			requestedFormatId;
 
 	UINT32			format;
 	gulong			clipboard_handler;
+	int abort_requested;
 
 	pthread_mutex_t		transfer_clip_mutex;
 	pthread_cond_t		transfer_clip_cond;
-	enum  { SCDW_NONE, SCDW_BUSY_WAIT, SCDW_ASYNCWAIT } srv_clip_data_wait;
+	enum  { SCDW_NONE, SCDW_BUSY_WAIT, SCDW_ASYNCWAIT, SCDW_FILEDOWNLOAD } srv_clip_data_wait;
 	gpointer		srv_data;
+	gboolean		streams_supported;
+
+	/* For file paste operations */
+	UINT32 filegroupdescriptorw_id;
+	UINT32 filecontents_id;
+	UINT32 preferred_dropeffect_id;
+	rfFilePasteTracker *fpt;
+
 };
 typedef struct rf_clipboard rfClipboard;
 
@@ -110,6 +155,7 @@ typedef enum {
 	REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FORMAT_LIST,
 	REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FORMAT_DATA_RESPONSE,
 	REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FORMAT_DATA_REQUEST,
+	REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FILE_CONTENTS_REQUEST,
 	REMMINA_RDP_EVENT_TYPE_SEND_MONITOR_LAYOUT,
 	REMMINA_RDP_EVENT_DISCONNECT
 } RemminaPluginRdpEventType;
@@ -145,6 +191,14 @@ struct remmina_plugin_rdp_event {
 			gint	desktopOrientation;
 			gint	desktopScaleFactor;
 			gint	deviceScaleFactor;
+			CLIPRDR_FILE_CONTENTS_REQUEST* pFileContentsRequest;
+		} clipboard_filecontentsrequest;
+		struct {
+			gint width;
+			gint height;
+			gint desktopOrientation;
+			gint desktopScaleFactor;
+			gint deviceScaleFactor;
 		} monitor_layout;
 	};
 };

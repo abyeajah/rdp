@@ -68,6 +68,7 @@ struct _RemminaProtocolWidgetClass {
 	void			(*desktop_resize)(RemminaProtocolWidget *gp);
 	void			(*update_align)(RemminaProtocolWidget *gp);
 	void			(*unlock_dynres)(RemminaProtocolWidget *gp);
+	void			(*has_files_to_paste)(RemminaProtocolWidget *gp);
 };
 
 GType remmina_protocol_widget_get_type(void)
@@ -108,6 +109,7 @@ void remmina_protocol_widget_call_feature_by_type(RemminaProtocolWidget *gp, Rem
 void remmina_protocol_widget_call_feature_by_ref(RemminaProtocolWidget *gp, const RemminaProtocolFeature *feature);
 /* Provide thread-safe way to emit signals */
 void remmina_protocol_widget_emit_signal(RemminaProtocolWidget *gp, const gchar *signal);
+void remmina_protocol_widget_emit_signal_with_int_param(RemminaProtocolWidget *gp, const gchar *signal, int param);
 void remmina_protocol_widget_register_hostkey(RemminaProtocolWidget *gp, GtkWidget *widget);
 
 typedef gboolean (*RemminaHostkeyFunc)(RemminaProtocolWidget *gp, guint keyval, gboolean release);
@@ -162,7 +164,10 @@ gboolean remmina_protocol_widget_plugin_receives_keystrokes(RemminaProtocolWidge
 /* Send to the plugin some keystrokes */
 void remmina_protocol_widget_send_keystrokes(RemminaProtocolWidget *gp, GtkMenuItem *widget);
 /* Take screenshot of plugin */
-gboolean remmina_protocol_widget_plugin_screenshot(RemminaProtocolWidget *gp, RemminaPluginScreenshotData *rpsd);
+gboolean remmina_protocol_widget_plugin_screenshot(RemminaProtocolWidget* gp, RemminaPluginScreenshotData *rpsd);
+/* Retrieve (paste locally) remote clipboard files */
+gboolean remmina_protocol_widget_plugin_retrieve_paste_files(RemminaProtocolWidget* gp, const char *destdir);
+gboolean remmina_protocol_widget_stop_clipboard_transfer(RemminaProtocolWidget* gp);
 
 void remmina_protocol_widget_update_remote_resolution(RemminaProtocolWidget *gp);
 

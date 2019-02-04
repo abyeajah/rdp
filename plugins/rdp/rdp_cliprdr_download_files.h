@@ -1,7 +1,8 @@
 /*
  * Remmina - The GTK+ Remote Desktop Client
+ * Copyright (C) 2010 Jay Sorg
  * Copyright (C) 2010-2011 Vic Lee
- * Copyright (C) 2012-2012 Jean-Louis Dupond
+ * Copyright (C) 2011 Marc-Andre Moreau <marcandre.moreau@gmail.com>
  * Copyright (C) 2014-2015 Antenore Gatta, Fabio Castelli, Giovanni Panozzo
  * Copyright (C) 2016-2019 Antenore Gatta, Giovanni Panozzo
  *
@@ -35,18 +36,14 @@
  *
  */
 
-#pragma once
 
 
-#include <freerdp/freerdp.h>
-#include "rdp_plugin.h"
+int rdp_cliprdr_download_start(rfClipboard* clipboard, const char *destdir);
+UINT rdp_cliprdr_download_server_format_data_response(CliprdrClientContext* context, const CLIPRDR_FORMAT_DATA_RESPONSE* formatDataResponse);
+UINT rdp_cliprdr_download_server_file_contents_response(CliprdrClientContext* context, const CLIPRDR_FILE_CONTENTS_RESPONSE* fileContentsResponse);
+void rdp_cliprdr_download_abort(rfClipboard* clipboard);
 
-void remmina_rdp_clipboard_init(rfContext* rfi);
-void remmina_rdp_clipboard_free(rfContext* rfi);
-void remmina_rdp_cliprdr_init(rfContext* rfc, CliprdrClientContext* cliprdr);
-void remmina_rdp_channel_cliprdr_process(RemminaProtocolWidget* gp, wMessage* event);
-void remmina_rdp_event_process_clipboard(RemminaProtocolWidget* gp, RemminaPluginRdpUiObject* ui);
-CLIPRDR_FORMAT_LIST *remmina_rdp_cliprdr_get_client_format_list(RemminaProtocolWidget* gp);
-void remmina_rdp_cliprdr_detach_owner(RemminaProtocolWidget* gp);
-void remmina_rdp_cliprdr_retrieve_remote_clipboard_files(RemminaProtocolWidget *gp, const char *destdir);
-void remmina_rdp_cliprdr_stop_clipboard_transfer(RemminaProtocolWidget *gp);
+
+
+
+

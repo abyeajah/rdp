@@ -403,7 +403,8 @@ static RemminaProtocolPlugin remmina_plugin_xdmcp =
 	remmina_plugin_xdmcp_query_feature,             // Query for available features
 	remmina_plugin_xdmcp_call_feature,              // Call a feature
 	NULL,                                           // Send a keystroke
-	NULL                                            // No screenshot support available
+	NULL,                                           // No screenshot support available
+	NULL                                            // No paste files support available
 };
 
 G_MODULE_EXPORT gboolean

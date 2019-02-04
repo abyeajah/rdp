@@ -105,6 +105,7 @@ struct _RemminaConnectionWindowPriv {
 	GtkWidget *					grid;
 
 	/* Toolitems that need to be handled */
+
 	GtkToolItem *					toolitem_autofit;
 	GtkToolItem *					toolitem_fullscreen;
 	GtkToolItem *					toolitem_switch_page;
@@ -112,6 +113,7 @@ struct _RemminaConnectionWindowPriv {
 	GtkToolItem *					toolitem_scale;
 	GtkToolItem *					toolitem_grab;
 	GtkToolItem *					toolitem_preferences;
+	GtkToolItem *					toolitem_pastefiles;
 	GtkToolItem *					toolitem_tools;
 	GtkToolItem *					toolitem_duplicate;
 	GtkToolItem *					toolitem_screenshot;
@@ -161,10 +163,14 @@ typedef struct _RemminaConnectionObject {
 
 	gboolean			plugin_can_scale;
 
+
 	gboolean			connected;
 	gboolean			dynres_unlocked;
-
 	gulong				deferred_open_size_allocate_handler;
+	gboolean			has_files_to_paste;
+	gboolean			paste_in_progress;
+	unsigned int		paste_progress_percent;
+
 } RemminaConnectionObject;
 
 enum {
@@ -386,7 +392,7 @@ static RemminaScaleMode get_current_allowed_scale_mode(RemminaConnectionObject *
 	scalemode = remmina_protocol_widget_get_current_scale_mode(REMMINA_PROTOCOL_WIDGET(cnnobj->proto));
 
 	plugin_has_dynres = remmina_protocol_widget_query_feature_by_type(REMMINA_PROTOCOL_WIDGET(cnnobj->proto),
-									  REMMINA_PROTOCOL_FEATURE_TYPE_SCALE);
+									  REMMINA_PROTOCOL_FEATURE_TYPE_DYNRESUPDATE);
 
 	plugin_can_scale = remmina_protocol_widget_query_feature_by_type(REMMINA_PROTOCOL_WIDGET(cnnobj->proto),
 									 REMMINA_PROTOCOL_FEATURE_TYPE_SCALE);
@@ -2039,8 +2045,53 @@ static void rcw_toolbar_grab(GtkWidget *widget, RemminaConnectionWindow *cnnwin)
 	}
 }
 
-static GtkWidget *
-rcw_create_toolbar(RemminaConnectionWindow *cnnwin, gint mode)
+static void rcw_toolbar_pastefiles(GtkWidget* widget, RemminaConnectionWindow* cnnwin)
+{
+	TRACE_CALL(__func__);
+	RemminaConnectionObject* cnnobj;
+
+	GtkWidget *dialog;
+	gint res;
+	char *destdir;
+
+	if (cnnwin->priv->toolbar_is_reconfiguring)
+		return;
+	if (!(cnnobj = rcw_get_visible_cnnobj(cnnwin))) return;
+
+	if (!cnnobj->has_files_to_paste)
+		return;
+
+	if (cnnobj->paste_in_progress) {
+		remmina_protocol_widget_stop_clipboard_transfer((RemminaProtocolWidget*)cnnobj->proto);
+		return;
+	}
+
+	dialog = gtk_file_chooser_dialog_new (_("Choose a destination folder"),
+		GTK_WINDOW(cnnwin),
+		GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+		_("_Cancel"),
+		GTK_RESPONSE_CANCEL,
+		_("_Select"),
+		GTK_RESPONSE_ACCEPT,
+		NULL);
+
+	res = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (res == GTK_RESPONSE_ACCEPT) {
+		GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
+		destdir = gtk_file_chooser_get_filename (chooser);
+	}
+
+	gtk_widget_destroy (dialog);
+
+	if (res == GTK_RESPONSE_ACCEPT) {
+		remmina_protocol_widget_plugin_retrieve_paste_files((RemminaProtocolWidget*)cnnobj->proto, destdir);
+		g_free(destdir);
+	}
+
+}
+
+static GtkWidget*
+rcw_create_toolbar(RemminaConnectionWindow* cnnwin, gint mode)
 {
 	TRACE_CALL(__func__);
 	RemminaConnectionWindowPriv *priv = cnnwin->priv;
@@ -2182,6 +2233,15 @@ rcw_create_toolbar(RemminaConnectionWindow *cnnwin, gint mode)
 	g_signal_connect(G_OBJECT(toolitem), "toggled", G_CALLBACK(rcw_toolbar_grab), cnnwin);
 	priv->toolitem_grab = toolitem;
 
+	/* Paste files button */
+	toolitem = gtk_tool_button_new(NULL, _("Paste files"));
+	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(toolitem), "remmina-paste-files-symbolic");
+	// gtk_tool_item_set_tooltip_text(toolitem, _("Paste files"));
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), toolitem, -1);
+	gtk_widget_show(GTK_WIDGET(toolitem));
+	g_signal_connect(G_OBJECT(toolitem), "clicked", G_CALLBACK(rcw_toolbar_pastefiles), cnnwin);
+	priv->toolitem_pastefiles = toolitem;
+
 	toolitem = gtk_toggle_tool_button_new();
 	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(toolitem), "remmina-preferences-system-symbolic");
 	gtk_tool_item_set_tooltip_text(toolitem, _("Preferences"));
@@ -2278,9 +2338,10 @@ static void rco_update_toolbar(RemminaConnectionObject *cnnobj)
 	TRACE_CALL(__func__);
 	RemminaConnectionWindowPriv *priv = cnnobj->cnnwin->priv;
 	GtkToolItem *toolitem;
-	gboolean bval, dynres_avail, scale_avail;
+	gboolean bval, dynres_avail, scale_avail, paste_sensitive;
 	gboolean test_floating_toolbar;
 	RemminaScaleMode scalemode;
+	gchar *ttip;
 
 	priv->toolbar_is_reconfiguring = TRUE;
 
@@ -2297,6 +2358,22 @@ static void rco_update_toolbar(RemminaConnectionObject *cnnobj)
 	scalemode = get_current_allowed_scale_mode(cnnobj, &dynres_avail, &scale_avail);
 	gtk_widget_set_sensitive(GTK_WIDGET(priv->toolitem_dynres), dynres_avail && cnnobj->connected);
 	gtk_widget_set_sensitive(GTK_WIDGET(priv->toolitem_scale), scale_avail && cnnobj->connected);
+
+	paste_sensitive = FALSE;
+	if (!cnnobj->has_files_to_paste)
+		ttip = g_strdup("");
+	else if (!cnnobj->paste_in_progress) {
+		paste_sensitive = TRUE;
+		ttip = g_strdup(_("Click here to paste some files available at the server side"));
+	}
+	else {
+		paste_sensitive = TRUE;
+		ttip = g_strdup_printf("Pasting files, %u%% done. Click here to abort.", cnnobj->paste_progress_percent);
+	}
+	gtk_widget_set_sensitive(GTK_WIDGET(priv->toolitem_pastefiles), paste_sensitive);
+	rcw_set_tooltip(GTK_WIDGET(priv->toolitem_pastefiles), ttip, 0, 0);
+	g_free(ttip);
+
 
 	switch (scalemode) {
 	case REMMINA_PROTOCOL_WIDGET_SCALE_MODE_NONE:
@@ -3756,7 +3833,7 @@ void rco_on_update_align(RemminaProtocolWidget *gp, gpointer data)
 	remmina_protocol_widget_update_alignment(cnnobj);
 }
 
-void rco_on_unlock_dynres(RemminaProtocolWidget *gp, gpointer data)
+static void rco_on_unlock_dynres(RemminaProtocolWidget *gp, gpointer data)
 {
 	TRACE_CALL(__func__);
 	RemminaConnectionObject *cnnobj = gp->cnnobj;
@@ -3764,7 +3841,35 @@ void rco_on_unlock_dynres(RemminaProtocolWidget *gp, gpointer data)
 	rco_update_toolbar(cnnobj);
 }
 
-gboolean rcw_open_from_filename(const gchar *filename)
+static void rco_on_pastefiles_status(RemminaProtocolWidget* gp, int signal_param, gpointer rcw_data)
+{
+	TRACE_CALL(__func__);
+	RemminaConnectionObject* cnnobj = gp->cnnobj;
+
+	printf("GIO: %s signal_param=%d\n", __func__, signal_param);
+
+	if (signal_param <= -2) {
+		/* No files to paste */
+		cnnobj->has_files_to_paste = FALSE;
+		cnnobj->paste_in_progress = FALSE;
+	} else if (signal_param == -1) {
+		/* The plugin has files to paste, but the plugin is not pasting */
+		cnnobj->has_files_to_paste = TRUE;
+		cnnobj->paste_in_progress = FALSE;
+		cnnobj->paste_progress_percent = 0;
+	} else {
+		/* signal_param >= 0
+		 * The plugin has files to paste, is psting and
+		 * the pasting progress is at signal_param% */
+		cnnobj->has_files_to_paste = TRUE;
+		cnnobj->paste_in_progress = TRUE;
+		cnnobj->paste_progress_percent = signal_param;
+	}
+	rco_update_toolbar(cnnobj);
+
+}
+
+gboolean rcw_open_from_filename(const gchar* filename)
 {
 	TRACE_CALL(__func__);
 	RemminaFile *remminafile;
@@ -3922,6 +4027,7 @@ GtkWidget *rcw_open_from_file_full(RemminaFile *remminafile, GCallback disconnec
 	g_signal_connect(G_OBJECT(cnnobj->proto), "desktop-resize", G_CALLBACK(rco_on_desktop_resize), NULL);
 	g_signal_connect(G_OBJECT(cnnobj->proto), "update-align", G_CALLBACK(rco_on_update_align), NULL);
 	g_signal_connect(G_OBJECT(cnnobj->proto), "unlock-dynres", G_CALLBACK(rco_on_unlock_dynres), NULL);
+	g_signal_connect(G_OBJECT(cnnobj->proto), "pastefiles-status", G_CALLBACK(rco_on_pastefiles_status), NULL);
 
 	if (!remmina_pref.save_view_mode)
 		remmina_file_set_int(cnnobj->remmina_file, "viewmode", remmina_pref.default_mode);

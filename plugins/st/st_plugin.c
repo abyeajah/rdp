@@ -282,7 +282,8 @@ static RemminaProtocolPlugin remmina_plugin =
 	remmina_st_query_feature,                     // Query for available features
 	NULL,                                         // Call a feature
 	NULL,                                         // Send a keystroke
-	NULL                                          // Capture screenshot
+	NULL,                                         // Capture screenshot
+	NULL                                          // No paste files support available
 };
 
 G_MODULE_EXPORT gboolean remmina_plugin_entry(RemminaPluginService *service)

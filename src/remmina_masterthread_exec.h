@@ -46,6 +46,7 @@ typedef struct remmina_masterthread_exec_data {
 	       FUNC_FTP_CLIENT_UPDATE_TASK, FUNC_FTP_CLIENT_GET_WAITING_TASK,
 	       FUNC_SFTP_CLIENT_CONFIRM_RESUME,
 	       FUNC_PROTOCOLWIDGET_EMIT_SIGNAL,
+	       FUNC_PROTOCOLWIDGET_EMIT_SIGNAL_WITH_PARAM,
 	       FUNC_PROTOCOLWIDGET_MPPROGRESS,
 	       FUNC_PROTOCOLWIDGET_MPDESTROY,
 	       FUNC_PROTOCOLWIDGET_MPSHOWRETRY,
@@ -80,6 +81,7 @@ typedef struct remmina_masterthread_exec_data {
 		struct {
 			RemminaProtocolWidget * gp;
 			const gchar *		signal_name;
+			int		int_param;
 		} protocolwidget_emit_signal;
 		struct {
 			RemminaConnectionObject *	cnnobj;

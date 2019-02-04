@@ -40,6 +40,7 @@
 #include "rdp_event.h"
 #include "rdp_cliprdr.h"
 #include "rdp_settings.h"
+#include "rdp_cliprdr_download_files.h"
 #include <gdk/gdkkeysyms.h>
 #include <cairo/cairo-xlib.h>
 #include <freerdp/locale/keyboard.h>
@@ -708,17 +709,21 @@ gboolean remmina_rdp_event_on_clipboard(GtkClipboard *gtkClipboard, GdkEvent *ev
 	TRACE_CALL(__func__);
 	RemminaPluginRdpEvent rdp_event = { 0 };
 	CLIPRDR_FORMAT_LIST* pFormatList;
+	rfContext* rfi = GET_PLUGIN_DATA(gp);
 
-	/* Usually "owner-change" is fired when a user pres "COPY" on the client
+	/* Usually "owner-change" is fired when a user presses "COPY" on the client
 	 * OR when this plugin calls gtk_clipboard_set_with_owner()
-	 * after receivina a RDP server format list in remmina_rdp_cliprdr_server_format_list()
+	 * after receiving a RDP server format list in remmina_rdp_cliprdr_server_format_list()
 	 * In the latter case, we must ignore owner change */
 
 	if (gtk_clipboard_get_owner(gtkClipboard) != (GObject*)gp) {
+		rdp_cliprdr_download_abort(&rfi->clipboard);
 		pFormatList = remmina_rdp_cliprdr_get_client_format_list(gp);
 		rdp_event.type = REMMINA_RDP_EVENT_TYPE_CLIPBOARD_SEND_CLIENT_FORMAT_LIST;
 		rdp_event.clipboard_formatlist.pFormatList = pFormatList;
 		remmina_rdp_event_event_push(gp, &rdp_event);
+		/* Also signal main window that we no longer have files to paste */
+		remmina_plugin_service->protocol_plugin_emit_signal_with_int_param(gp, "have-files-to-paste", 0);
 	}
 	return TRUE;
 }

@@ -72,6 +72,9 @@ static gboolean remmina_masterthread_exec_callback(RemminaMTExecData *d)
 		case FUNC_PROTOCOLWIDGET_EMIT_SIGNAL:
 			remmina_protocol_widget_emit_signal(d->p.protocolwidget_emit_signal.gp, d->p.protocolwidget_emit_signal.signal_name);
 			break;
+		case FUNC_PROTOCOLWIDGET_EMIT_SIGNAL_WITH_PARAM:
+			remmina_protocol_widget_emit_signal_with_int_param(d->p.protocolwidget_emit_signal.gp, d->p.protocolwidget_emit_signal.signal_name, d->p.protocolwidget_emit_signal.int_param);
+			break;
 		case FUNC_PROTOCOLWIDGET_MPPROGRESS:
 			d->p.protocolwidget_mpprogress.ret_mp = remmina_protocol_widget_mpprogress(d->p.protocolwidget_mpprogress.cnnobj, d->p.protocolwidget_mpprogress.message,
 				d->p.protocolwidget_mpprogress.response_callback, d->p.protocolwidget_mpprogress.response_callback_data);

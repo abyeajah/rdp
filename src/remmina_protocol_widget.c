@@ -112,6 +112,7 @@ enum {
 	DESKTOP_RESIZE_SIGNAL,
 	UPDATE_ALIGN_SIGNAL,
 	UNLOCK_DYNRES_SIGNAL,
+	FILESTOPASTE_SIGNAL,
 	LAST_SIGNAL
 };
 
@@ -141,6 +142,9 @@ static void remmina_protocol_widget_class_init(RemminaProtocolWidgetClass *klass
 	remmina_protocol_widget_signals[UNLOCK_DYNRES_SIGNAL] = g_signal_new("unlock-dynres", G_TYPE_FROM_CLASS(klass),
 									     G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION, G_STRUCT_OFFSET(RemminaProtocolWidgetClass, unlock_dynres), NULL, NULL,
 									     g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	remmina_protocol_widget_signals[FILESTOPASTE_SIGNAL] = g_signal_new("has-files-to-paste", G_TYPE_FROM_CLASS(klass),
+									G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION, G_STRUCT_OFFSET(RemminaProtocolWidgetClass, has_files_to_paste), NULL, NULL,
+									g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 }
 
 static void remmina_protocol_widget_destroy(RemminaProtocolWidget *gp, gpointer data)
@@ -531,11 +535,49 @@ gboolean remmina_protocol_widget_plugin_screenshot(RemminaProtocolWidget *gp, Re
 		remmina_log_printf("plugin screenshot function is not implemented\n");
 		return FALSE;
 	}
-
 	return gp->priv->plugin->get_plugin_screenshot(gp, rpsd);
 }
 
-void remmina_protocol_widget_emit_signal(RemminaProtocolWidget *gp, const gchar *signal_name)
+gboolean remmina_protocol_widget_plugin_retrieve_paste_files(RemminaProtocolWidget* gp, const char *destdir)
+{
+	if (!gp->priv->plugin->retrieve_remote_clipboard_files) {
+		remmina_log_printf("paste files function is not implemented\n");
+		return FALSE;
+	}
+	if (gp->priv->plugin->retrieve_remote_clipboard_files != NULL)
+		gp->priv->plugin->retrieve_remote_clipboard_files(gp, destdir);
+	return TRUE;
+}
+
+gboolean remmina_protocol_widget_stop_clipboard_transfer(RemminaProtocolWidget* gp)
+{
+	if (gp->priv->plugin->stop_clipboard_transfer != NULL)
+		gp->priv->plugin->stop_clipboard_transfer(gp);
+	return TRUE;
+}
+
+void remmina_protocol_widget_emit_signal_with_int_param(RemminaProtocolWidget* gp, const gchar* signal_name, int int_param)
+{
+	TRACE_CALL(__func__);
+
+	if ( !remmina_masterthread_exec_is_main_thread() ) {
+		/* Allow the execution of this function from a non main thread */
+		RemminaMTExecData *d;
+		d = (RemminaMTExecData*)g_malloc( sizeof(RemminaMTExecData) );
+		d->func = FUNC_PROTOCOLWIDGET_EMIT_SIGNAL_WITH_PARAM;
+		d->p.protocolwidget_emit_signal.signal_name = signal_name;
+		d->p.protocolwidget_emit_signal.gp = gp;
+		d->p.protocolwidget_emit_signal.int_param = int_param;
+		remmina_masterthread_exec_and_wait(d);
+		g_free(d);
+		return;
+	}
+	printf("GIO: sto per emettere il segnale %s com parametro %d\n", signal_name, int_param);
+	g_signal_emit_by_name(G_OBJECT(gp), signal_name, int_param);
+
+}
+
+void remmina_protocol_widget_emit_signal(RemminaProtocolWidget* gp, const gchar* signal_name)
 {
 	TRACE_CALL(__func__);
 
@@ -549,6 +591,7 @@ void remmina_protocol_widget_emit_signal(RemminaProtocolWidget *gp, const gchar 
 		d->func = FUNC_PROTOCOLWIDGET_EMIT_SIGNAL;
 		d->p.protocolwidget_emit_signal.signal_name = signal_name;
 		d->p.protocolwidget_emit_signal.gp = gp;
+		d->p.protocolwidget_emit_signal.int_param = 0;
 		remmina_masterthread_exec_and_wait(d);
 		g_free(d);
 		return;

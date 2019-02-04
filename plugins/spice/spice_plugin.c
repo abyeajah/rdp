@@ -494,7 +494,8 @@ static RemminaProtocolPlugin remmina_plugin_spice =
 	remmina_plugin_spice_query_feature,                                     // Query for available features
 	remmina_plugin_spice_call_feature,                                      // Call a feature
 	remmina_plugin_spice_keystroke,                                         // Send a keystroke
-	NULL                                                                    // No screenshot support available
+	NULL,                                                                   // No screenshot support available
+	NULL 						                                           // No paste files support available
 };
 
 G_MODULE_EXPORT gboolean

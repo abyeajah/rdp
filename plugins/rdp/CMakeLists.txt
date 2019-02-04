@@ -54,6 +54,8 @@ set(REMMINA_PLUGIN_RDP_SRCS
         rdp_cliprdr.h
         rdp_channels.c
         rdp_channels.h
+        rdp_cliprdr_download_files.c
+        rdp_cliprdr_download_files.h
         )
 
 add_definitions(-DFREERDP_REQUIRED_MAJOR=${FREERDP_REQUIRED_MAJOR})
