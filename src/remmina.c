@@ -55,6 +55,7 @@
 #include "remmina_widget_pool.h"
 #include "remmina/remmina_trace_calls.h"
 #include "remmina_stats_sender.h"
+#include "remmina_fuse.h"
 
 
 #ifdef HAVE_ERRNO_H
@@ -232,6 +233,9 @@ static void remmina_on_startup(GApplication *app)
 	gtk_icon_theme_append_search_path(gtk_icon_theme_get_default(),
 		REMMINA_RUNTIME_DATADIR G_DIR_SEPARATOR_S "icons");
 	g_application_hold(app);
+
+	/* Initialize FUSE filesystem */
+	remmina_fuse_init();
 
 	remmina_stats_sender_schedule();
 

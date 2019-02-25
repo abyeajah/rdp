@@ -60,6 +60,8 @@ list(APPEND REMMINA_SRCS
     "remmina_file_manager.h"
     "remmina_ftp_client.c"
     "remmina_ftp_client.h"
+    "remmina_fuse.h"
+    "remmina_fuse.c"
     "remmina_icon.c"
     "remmina_icon.h"
     "remmina_key_chooser.c"
@@ -182,6 +184,14 @@ if(VTE_FOUND)
         add_definitions(-DHAVE_LIBVTE)
         include_directories(${VTE_INCLUDE_DIRS})
         target_link_libraries(remmina ${VTE_LIBRARIES})
+endif()
+
+find_required_package(LIBFUSE)
+if(LIBFUSE_FOUND)
+	include_directories(${LIBFUSE_INCLUDE_DIR})
+	target_link_libraries(remmina ${LIBFUSE_LIBRARIES})
+else()
+	message(FATAL_ERROR "libfuse library not found")
 endif()
 
 if(GTK3_FOUND)
