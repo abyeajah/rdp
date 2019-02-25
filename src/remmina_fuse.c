@@ -45,6 +45,13 @@
 
 static gchar *fuse_mountpoint = NULL;
 static gboolean fuse_initialized = FALSE;
+static struct fuse_args args = {
+	.argc = 2,
+	.argv = (char *[]){".","-oauto_unmount"},
+	.allocated = 0
+};
+
+const gchar fuse_subdir[] = "/remmina";
 
 void remmina_fuse_init()
 {
@@ -54,11 +61,33 @@ void remmina_fuse_init()
 		return;
 
 	rtdir = g_get_user_runtime_dir();
+	fuse_mountpoint = g_malloc0(strlen(rtdir) + strlen(fuse_subdir) + 1);
+	strcpy(fuse_mountpoint, rtdir);
+	strcat(fuse_mountpoint, fuse_subdir);
 
-	printf("GIO: rtdir is %s\n", rtdir);
+	/* Try to create fuse_mountpoint */
+	if (!g_file_test(fuse_mountpoint, G_FILE_TEST_EXISTS)) {
+		mkdir(fuse_mountpoint, 0700);
+	}
 
+	if (!g_file_test(fuse_mountpoint, G_FILE_TEST_IS_DIR)) {
+		g_print("REMMINA WARNING: %s should be a directory, but it's not.\n", fuse_mountpoint);
+		g_free(fuse_mountpoint);
+	}
+
+	if (!fuse_mount(fuse_mountpoint, &args)) {
+		g_print("REMMINA WARNING: Unable to mount fuse remmina directory on %s\n", fuse_mountpoint);
+		g_free(fuse_mountpoint);
+	}
+	fuse_initialized = TRUE;
 
 }
+
+void remmina_fuse_cleanup()
+{
+
+}
+
 
 
 

@@ -32,6 +32,8 @@ endif()
 
 if (LIBFUSE_FOUND)
 	add_definitions(-DHAVE_LIBFUSE)
+	add_definitions(-D_FILE_OFFSET_BITS=64)
+	set(LIBFUSE_LIBRARIES ${LIBFUSE_LIBRARY})
 endif()
 
 mark_as_advanced(LIBFUSE_INCLUDE_DIR LIBFUSE_LIBRARY)
