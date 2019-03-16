@@ -38,6 +38,7 @@
 
 #include <glib.h>
 #include <errno.h>
+#include <unistd.h>
 #include "remmina.h"
 #include "remmina_fuse.h"
 
@@ -223,15 +224,31 @@ static void *fuse_thread_start(void *arg)
 void remmina_fuse_init()
 {
 	const gchar *rtdir;
+    gchar *fuse_remmina_topdir, *fpath;
 	int err;
+    DIR *d;
+    struct dirent *de;
 
 	if (fuse_initialized)
 		return;
 
 	rtdir = g_get_user_runtime_dir();
-	fuse_mountpoint = g_malloc0(strlen(rtdir) + strlen(fuse_subdir) + 1);
-	strcpy(fuse_mountpoint, rtdir);
-	strcat(fuse_mountpoint, fuse_subdir);
+    fuse_remmina_topdir = g_strdup_printf("%s/%s", rtdir, fuse_subdir);
+    /* Try to delete all undeleted/old mountdirs */
+    d = opendir(fuse_remmina_topdir);
+    if (d) {
+        while((de = readdir(d)) != NULL) {
+            if (strncmp(de->d_name, "pid_", 4) == 0) {
+                fpath = g_strdup_printf("%s/%s", fuse_remmina_topdir, de->d_name);
+                rmdir(fpath);
+                g_free(fpath);
+            }
+        }
+        closedir(d);
+    }
+
+    fuse_mountpoint = g_strdup_printf("%s/pid_%u", fuse_remmina_topdir, (unsigned)getpid());
+    g_free(fuse_remmina_topdir);
 
 	/* Try to create fuse_mountpoint */
 	if (!g_file_test(fuse_mountpoint, G_FILE_TEST_EXISTS)) {
@@ -262,7 +279,4 @@ void remmina_fuse_cleanup()
 {
 
 }
-
-
-
 
