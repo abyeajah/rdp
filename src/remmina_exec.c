@@ -45,6 +45,7 @@
 #include "remmina_pref_dialog.h"
 #include "remmina_file.h"
 #include "remmina_pref.h"
+#include "remmina_fuse.h"
 #include "remmina_file_editor.h"
 #include "rcw.h"
 #include "remmina_about.h"
@@ -84,6 +85,9 @@ const gchar* remmina_exec_get_build_config(void)
 void remmina_exec_exitremmina()
 {
 	TRACE_CALL(__func__);
+    
+    /* deinitialize fuse */
+    remmina_fuse_cleanup();
 
 	/* Save main window state/position */
 	remmina_main_save_before_destroy();

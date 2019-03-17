@@ -56,11 +56,11 @@ static struct fuse_args args = {
 
 static const gchar fuse_subdir[] = "/remmina";
 static pthread_t ft;
+struct fuse_session *se;
 
 /* DEMO */
 static const char *hello_str = "Hello World!\n";
 static const char *hello_name = "hello";
-
 
 static int rfuse_stat(fuse_ino_t ino, struct stat *stbuf)
 {
@@ -82,7 +82,6 @@ static int rfuse_stat(fuse_ino_t ino, struct stat *stbuf)
 	}
 	return 0;
 }
-
 
 static void rfuse_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
@@ -200,23 +199,19 @@ static struct fuse_lowlevel_ops hello_ll_oper = {
 
 static void *fuse_thread_start(void *arg)
 {
-	struct fuse_session *se;
-	int err = -1;
-
-	g_print("GIO: fuse thread!\n");
-
 	se = fuse_lowlevel_new(&args, &hello_ll_oper, sizeof(hello_ll_oper), NULL);
 	if (se != NULL) {
+        fuse_set_signal_handlers(se);
 		fuse_session_add_chan(se, fuse_ch);
-		err = fuse_session_loop(se);
+		fuse_session_loop(se);
 		fuse_session_remove_chan(fuse_ch);
+        fuse_session_destroy(se);
+        se = NULL;
 	}
-	fuse_session_destroy(se);
 	fuse_unmount(fuse_mountpoint, fuse_ch);
-	g_free(fuse_mountpoint);
-	fuse_initialized = FALSE;
-
-	g_print("GIO: fuse thread ENDED, err=%d.\n",err);
+    rmdir(fuse_mountpoint);
+    g_free(fuse_mountpoint);
+    fuse_initialized = FALSE;
 
 	return NULL;
 }
@@ -234,6 +229,18 @@ void remmina_fuse_init()
 
 	rtdir = g_get_user_runtime_dir();
     fuse_remmina_topdir = g_strdup_printf("%s/%s", rtdir, fuse_subdir);
+    
+   	/* Try to create fuse_remmina_topdir */
+	if (!g_file_test(fuse_remmina_topdir, G_FILE_TEST_EXISTS)) {
+		mkdir(fuse_remmina_topdir, 0700);
+	}
+	if (!g_file_test(fuse_remmina_topdir, G_FILE_TEST_IS_DIR)) {
+		g_print("REMMINA WARNING: %s should be a directory, but it's not. Cannot initialize FUSE.\n", fuse_remmina_topdir);
+		g_free(fuse_remmina_topdir);
+        return;
+	}
+
+    
     /* Try to delete all undeleted/old mountdirs */
     d = opendir(fuse_remmina_topdir);
     if (d) {
@@ -256,13 +263,15 @@ void remmina_fuse_init()
 	}
 
 	if (!g_file_test(fuse_mountpoint, G_FILE_TEST_IS_DIR)) {
-		g_print("REMMINA WARNING: %s should be a directory, but it's not.\n", fuse_mountpoint);
+		g_print("REMMINA WARNING: %s should be a directory, but it's not. Cannot initialize FUSE.\n", fuse_mountpoint);
 		g_free(fuse_mountpoint);
+        return;
 	}
 
 	if (!(fuse_ch = fuse_mount(fuse_mountpoint, &args))) {
-		g_print("REMMINA WARNING: Unable to mount fuse directory on %s\n", fuse_mountpoint);
+		g_print("REMMINA WARNING: Unable to mount fuse directory on %s. Cannot initialize FUSE.\n", fuse_mountpoint);
 		g_free(fuse_mountpoint);
+        return;
 	}
 	fuse_initialized = TRUE;
 
@@ -271,12 +280,33 @@ void remmina_fuse_init()
 		fuse_unmount(fuse_mountpoint, fuse_ch);
 		g_free(fuse_mountpoint);
 		fuse_initialized = FALSE;
+        return;
 	}
 
 }
 
 void remmina_fuse_cleanup()
 {
-
+    if (fuse_initialized) {
+        fuse_session_exit(se);
+        usleep(10000);
+        if (fuse_initialized) {
+            pthread_kill(ft, SIGINT);   // Use SIGINT, captured with fuse_set_signal_handlers()
+            usleep(200000);     // We need at least 40ms on a core i3 for a regular fuse_session_exit to complete
+        }
+    }
+    if (fuse_initialized) {
+        /* Fuse thread don't want to terminate. Try to hard terminate */
+        g_print("REMMINA WARNING: hard terminating fuse thread.\n");
+        pthread_cancel(ft);
+       	if (se) {
+            fuse_session_destroy(se);
+            se = NULL;
+        }
+        fuse_unmount(fuse_mountpoint, fuse_ch);
+        rmdir(fuse_mountpoint);
+        g_free(fuse_mountpoint);
+        fuse_initialized = FALSE;
+    }
 }
 

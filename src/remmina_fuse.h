@@ -38,6 +38,7 @@
 G_BEGIN_DECLS
 
 void remmina_fuse_init(void);
+void remmina_fuse_cleanup(void);
 
 G_END_DECLS
 
