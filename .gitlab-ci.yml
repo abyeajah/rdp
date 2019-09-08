@@ -49,8 +49,9 @@ appimage:build:
 
   script:
     - mkdir $BUILD_FOLDER
-    - cmake -B$BUILD_FOLDER -H. $CMAKE_BUILD_OPTIONS -DCMAKE_INSTALL_PREFIX=/usr
-    - make VERBOSE=1 -C $BUILD_FOLDER
+    - cd $BUILD_FOLDER
+    - cmake -DCMAKE_PREFIX_PATH=/usr -DCMAKE_INSTALL_PREFIX=/usr -DWITH_MANPAGES=1 -DWITH_KF5WALLET=on --build=build ..
+    - make VERBOSE=1
     - make install DESTDIR=AppDir
   artifacts:
     paths:
