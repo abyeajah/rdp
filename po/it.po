@@ -1866,7 +1866,7 @@ msgstr ""
 "client e il server supportino una versione TLS comune."
 
 #: plugins/rdp/rdp_plugin.c:1590
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Unable to establish a connection to the RDP server. Check \"Security "
 "protocol negotiation\" \"%s\"."
@@ -1967,17 +1967,14 @@ msgid "Negotiate protocol security"
 msgstr ""
 
 #: plugins/rdp/rdp_plugin.c:1981
-#, fuzzy
 msgid "NLA protocol security"
 msgstr "Raggruppa le schede in base al protocollo"
 
 #: plugins/rdp/rdp_plugin.c:1982
-#, fuzzy
 msgid "TLS protocol security"
 msgstr "Raggruppa le schede in base al protocollo"
 
 #: plugins/rdp/rdp_plugin.c:1983
-#, fuzzy
 msgid "RDP protocol security"
 msgstr "Raggruppa le schede in base al protocollo"
 
@@ -2397,7 +2394,6 @@ msgid "Switch from grouped to list view"
 msgstr "Passa dalla vista raggruppata alla vista elenco"
 
 #: data/ui/remmina_main.glade:70
-#, fuzzy
 msgid "Remote Desktop Client"
 msgstr "Client di connessione a desktop remoti Remmina"
 
