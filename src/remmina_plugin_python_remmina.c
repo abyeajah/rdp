@@ -278,7 +278,7 @@ static PyObject* remmina_protocol_widget_get_profile_remote_width_wrapper(PyObje
 static PyMethodDef remmina_python_module_type_methods[] = {
 	{"register_plugin", (PyCFunction)remmina_register_plugin_wrapper,  METH_O, NULL },
 	{"log_print", (PyCFunction)remmina_plugin_python_log_printf_wrapper,  METH_VARARGS, NULL },
-	{"get_datadir", (PyCFunction)remmina_file_get_datadir_wrapper},
+	/*{"get_datadir", (PyCFunction)remmina_file_get_datadir_wrapper},
 	{"file_new", (PyCFunction)remmina_file_new_wrapper},
 
 	{"pref_set_value", (PyCFunction)remmina_pref_set_value_wrapper},
@@ -296,7 +296,7 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	{"masterthread_exec_is_main_thread", (PyCFunction)remmina_masterthread_exec_is_main_thread_wrapper},
 	{"gtksocket_available", (PyCFunction)remmina_gtksocket_available_wrapper},
 	{"protocol_widget_get_profile_remote_width", (PyCFunction)remmina_protocol_widget_get_profile_remote_width_wrapper},
-	{"protocol_widget_get_profile_remote_heigh", (PyCFunction)remmina_protocol_widget_get_profile_remote_heigh_wrapper},
+	{"protocol_widget_get_profile_remote_heigh", (PyCFunction)remmina_protocol_widget_get_profile_remote_heigh_wrapper},*/
     {NULL}  /* Sentinel */
 };
 
