@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include "remmina/plugin.h"
+
 RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyObject* pluginInstance);
 RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyObject* pluginInstance);
 RemminaPlugin* remmina_plugin_python_create_file_plugin(PyObject* pluginInstance);

@@ -97,7 +97,6 @@
 #include "remmina_file.h"
 #include "remmina_plugin_python_remmina.h"
 #include "remmina_plugin_python_remmina_file.h"
-
 #include "remmina_plugin_python_protocol_widget.h"
 
 // -- Python Type -> RemminaWidget
@@ -148,7 +147,7 @@ static PyObject* protocol_widget_chat_close(PyRemminaProtocolWidget* self, PyObj
 static PyObject* protocol_widget_chat_receive(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_send_keys_signals(PyRemminaProtocolWidget* self, PyObject* args);
 
-static PyMethodDef python_protocol_widget_type_methods[] = {
+static struct PyMethodDef python_protocol_widget_type_methods[] = {
 	{"get_viewport", (PyCFunction)protocol_widget_get_viewport, METH_NOARGS, "" },
 	{"get_width", (PyCFunction)protocol_widget_get_width, METH_NOARGS, "" },
 	{"set_width", (PyCFunction)protocol_widget_set_width, METH_VARARGS, "" },
@@ -193,18 +192,42 @@ static PyMethodDef python_protocol_widget_type_methods[] = {
 	{"chat_open", (PyCFunction)protocol_widget_chat_open, METH_VARARGS, "" },
 	{"chat_close", (PyCFunction)protocol_widget_chat_close, METH_VARARGS, "" },
 	{"chat_receive", (PyCFunction)protocol_widget_chat_receive, METH_VARARGS, "" },
-	{"send_keys_signals", (PyCFunction)protocol_widget_send_keys_signals, METH_VARARGS | METH_KEYWORDS, "" }
+	{"send_keys_signals", (PyCFunction)protocol_widget_send_keys_signals, METH_VARARGS | METH_KEYWORDS, "" },
+    { NULL }
 };
 
+static int python_protocol_widget_init(PyRemminaProtocolWidget *self, PyObject *args, PyObject *kwds)
+{
+    return 0;
+}
+
+static void generic_dealloc(PyObject* self) { PyObject_Del(self); }
+
+static PyObject* python_protocol_feature_new(PyTypeObject * type, PyObject* kws, PyObject* args)
+{
+    PyRemminaProtocolWidget *self;
+    self = (PyRemminaProtocolWidget*)type->tp_alloc(type, 0);
+    if (!self)
+        return NULL;
+
+    return (PyObject*)self;
+}
+
+static int python_protocol_feature_init(PyRemminaProtocolWidget *self, PyObject *args, PyObject *kwds)
+{
+    return 0;
+}
+
 static PyTypeObject python_protocol_widget_type = {
-    PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "remmina.RemminaWidget",
-    .tp_doc = "Remmina protocol widget",
-    .tp_basicsize = sizeof(PyRemminaProtocolWidget),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_new = PyType_GenericNew,
-    .tp_methods = python_protocol_widget_type_methods
+        PyVarObject_HEAD_INIT(NULL, 0)
+        .tp_name = "remmina.RemminaProtocolWidget",
+        .tp_doc = "RemminaProtocolWidget",
+        .tp_basicsize = sizeof(PyRemminaProtocolWidget),
+        .tp_itemsize = 0,
+        .tp_flags = Py_TPFLAGS_DEFAULT,
+        .tp_new = python_protocol_feature_new,
+        .tp_init = python_protocol_feature_init,
+        .tp_methods = python_protocol_widget_type_methods
 };
 
 typedef struct {
@@ -219,8 +242,23 @@ typedef struct {
 		return NULL; \
 	}
 
+PyRemminaProtocolWidget* remmina_plugin_python_protocol_widget_create() {
+    PyRemminaProtocolWidget* result = PyObject_NEW(PyRemminaProtocolWidget, &python_protocol_widget_type);
+    PyErr_Print();
+    Py_INCREF(result);
+    result->gp = NULL;
+    return result;
+}
+
 void remmina_plugin_python_protocol_widget_init(void) {
-  pygobject_init(-1, -1, -1);
+    pygobject_init(-1, -1, -1);
+}
+
+void remmina_plugin_python_protocol_widget_type_ready(void) {
+    if (PyType_Ready(&python_protocol_widget_type) < 0) {
+        g_printerr("Error initializing remmina.RemminaWidget!\n");
+        PyErr_Print();
+    }
 }
 
 static PyObject* protocol_widget_get_viewport(PyRemminaProtocolWidget* self, PyObject* args)

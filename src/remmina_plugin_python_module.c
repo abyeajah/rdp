@@ -58,6 +58,27 @@
 #include "remmina/plugin.h"
 #include "remmina_protocol_widget.h"
 
+static void remmina_plugin_python_check_error() {
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+    }
+}
+
+static PyObject* __tmp__result__;
+#ifdef WITH_TRACE_CALLS
+static void LogPythonMethodCall(PyObject* instance, const gchar *method) {
+    g_print("Called Python method@%ld: %s.%s() -> %s\n", PyObject_Hash(instance), instance->ob_type->tp_name, method, PyObject_Str(__tmp__result__)); \
+}
+#define CallPythonMethod(instance, name, params, ...)                             \
+    __tmp__result__ = PyObject_CallMethod(instance, name, params, ##__VA_ARGS__); \
+    LogPythonMethodCall(instance, name);                                          \
+    remmina_plugin_python_check_error()
+#else
+#define CallPythonMethod(instance, name, params, ...)                             \
+    __tmp__result__ = PyObject_CallMethod(instance, name, params, ##__VA_ARGS__); \
+    remmina_plugin_python_check_error()
+#endif // WITH_TRACE_CALLS
+
 /**
  * @brief Handles the initialization of the Python plugin.
  * @details This function prepares the plugin structure and calls the init method of the
@@ -70,7 +91,8 @@ static void remmina_protocol_init_wrapper(RemminaProtocolWidget *gp)
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
     py_plugin->gp->gp = gp;
-    PyObject_CallMethod(py_plugin, "init", "O", py_plugin->gp);
+    CallPythonMethod(py_plugin->instance, "init", "O", py_plugin->gp);
+    
 }
 
 /**
@@ -79,13 +101,16 @@ static void remmina_protocol_init_wrapper(RemminaProtocolWidget *gp)
  *
  * @param   gp  The protocol widget used by the plugin.
  */
-static gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget *gp)
-{
-	TRACE_CALL(__func__);
+static gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget *gp) {
+    TRACE_CALL(__func__);
     remmina_plugin_manager_service.protocol_plugin_signal_connection_opened(gp);
-    PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "open_connection", "O", py_plugin->gp);
-    return result == Py_True;
+    PyPlugin *py_plugin = remmina_plugin_python_module_get_plugin(gp);
+    if (py_plugin) {
+        PyObject *result = CallPythonMethod(py_plugin->instance, "open_connection", "O", py_plugin->gp);
+        return result == Py_True;
+    } else {
+        return gtk_false();
+    }
 }
 
 /**
@@ -98,7 +123,7 @@ static gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget 
 {
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "close_connection", "O", py_plugin->gp);
+    PyObject* result = CallPythonMethod(py_plugin->instance, "close_connection", "O", py_plugin->gp);
     return result == Py_True;
 }
 
@@ -108,11 +133,11 @@ static gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget 
  *
  * @param   gp  The protocol widget used by the plugin.
  */
-static gboolean remmina_protocol_query_feature_wrapper(RemminaProtocolPlugin* plugin, RemminaProtocolWidget *gp, const RemminaProtocolFeature *feature)
+static gboolean remmina_protocol_query_feature_wrapper(RemminaProtocolWidget *gp, const RemminaProtocolFeature *feature)
 {
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "query_feature", "O", py_plugin->gp);
+    PyObject* result = CallPythonMethod(py_plugin->instance, "query_feature", "O", py_plugin->gp);
     return result == Py_True;
 }
 
@@ -122,11 +147,11 @@ static gboolean remmina_protocol_query_feature_wrapper(RemminaProtocolPlugin* pl
  *
  * @param   gp  The protocol widget used by the plugin.
  */
-static void remmina_protocol_call_feature_wrapper(RemminaProtocolPlugin* plugin, RemminaProtocolWidget *gp, const RemminaProtocolFeature *feature)
+static void remmina_protocol_call_feature_wrapper(RemminaProtocolWidget *gp, const RemminaProtocolFeature *feature)
 {
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "call_feature", "O", py_plugin->gp);
+    PyObject* result = CallPythonMethod(py_plugin->instance, "call_feature", "O", py_plugin->gp);
 }
 
 /**
@@ -135,11 +160,11 @@ static void remmina_protocol_call_feature_wrapper(RemminaProtocolPlugin* plugin,
  *
  * @param   gp  The protocol widget used by the plugin.
  */
-static void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolPlugin* plugin, RemminaProtocolWidget *gp, const guint keystrokes[], const gint keylen)
+static void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolWidget *gp, const guint keystrokes[], const gint keylen)
 {
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "send_keystrokes", "O", py_plugin->gp);
+    PyObject* result = CallPythonMethod(py_plugin->instance, "send_keystrokes", "O", py_plugin->gp);
 }
 
 /**
@@ -148,11 +173,11 @@ static void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolPlugin* plugi
  *
  * @param   gp  The protocol widget used by the plugin.
  */
-static gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolPlugin* plugin, RemminaProtocolWidget *gp, RemminaPluginScreenshotData *rpsd)
+static gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolWidget *gp, RemminaPluginScreenshotData *rpsd)
 {
 	TRACE_CALL(__func__);
     PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
-    PyObject* result = PyObject_CallMethod(py_plugin, "get_plugin_screenshot", "O", py_plugin->gp);
+    PyObject* result = CallPythonMethod(py_plugin->instance, "get_plugin_screenshot", "O", py_plugin->gp);
     return result == Py_True;
 }
 
@@ -168,8 +193,6 @@ static long GetEnumOrDefault(PyObject* instance, gchar* constant_name, long def)
 
 RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyObject* pluginInstance)
 {
-        RemminaProtocolPlugin* remmina_plugin = (RemminaProtocolPlugin*)malloc(sizeof(RemminaProtocolPlugin));
-
         if(!PyObject_HasAttrString(pluginInstance, "icon_name_ssh")) {
             g_printerr("Error creating Remmina plugin. Python plugin instance is missing member: icon_name_ssh\n");
             return NULL;
@@ -194,6 +217,8 @@ RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyObject* pluginInst
             g_printerr("Error creating Remmina plugin. Python plugin instance is missing member: ssh_setting\n");
             return NULL;
         }
+
+        RemminaProtocolPlugin* remmina_plugin = (RemminaProtocolPlugin*)malloc(sizeof(RemminaProtocolPlugin));
 
         remmina_plugin->type = REMMINA_PLUGIN_TYPE_PROTOCOL;
         remmina_plugin->name = PyUnicode_AsUTF8(PyObject_GetAttrString(pluginInstance, "name"));                                               // Name

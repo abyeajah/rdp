@@ -34,16 +34,7 @@
 
 #pragma once
 
-/**
- * @brief The Python abstraction of the protocol widget struct.
- *
- * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
- * native plugins.
- */
-typedef struct {
-    PyObject_HEAD
-    RemminaProtocolWidget* gp;
-} PyRemminaProtocolWidget;
+#include "remmina_plugin_python_protocol_widget.h"
 
 /**
  * @brief Maps an instance of a Python plugin to a Remmina one.
@@ -52,8 +43,6 @@ typedef struct {
  * protocol widget are stored in this struct.
  */
 typedef struct {
-    PyObject *pythonInstance;
-
     RemminaProtocolPlugin *protocol_plugin;
     RemminaFilePlugin* file_plugin;
     RemminaSecretPlugin* secret_plugin;
@@ -63,6 +52,7 @@ typedef struct {
     RemminaPlugin* generic_plugin;
 
     PyRemminaProtocolWidget *gp;
+    PyObject *instance;
 } PyPlugin;
 
 

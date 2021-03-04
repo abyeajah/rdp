@@ -34,5 +34,17 @@
 
 #pragma once
 
-void remmina_plugin_python_protocol_widget_init(void);
+/**
+ * @brief The Python abstraction of the protocol widget struct.
+ *
+ * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
+ * native plugins.
+ */
+typedef struct {
+    PyObject_HEAD
+    RemminaProtocolWidget* gp;
+} PyRemminaProtocolWidget;
 
+void remmina_plugin_python_protocol_widget_init(void);
+void remmina_plugin_python_protocol_widget_type_ready(void);
+PyRemminaProtocolWidget* remmina_plugin_python_protocol_widget_create();
