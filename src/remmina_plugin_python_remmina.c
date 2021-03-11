@@ -297,7 +297,7 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	{"register_plugin", (PyCFunction)remmina_register_plugin_wrapper,  METH_O, NULL },
 	{"log_print", (PyCFunction)remmina_plugin_python_log_printf_wrapper,  METH_VARARGS, NULL },
     {"show_dialog", (PyCFunctionWithKeywords)remmina_plugin_python_show_dialog_wrapper,  METH_VARARGS | METH_KEYWORDS, NULL },
-    //{"get_mainwindow", (PyCFunction)remmina_plugin_python_get_mainwindow_wrapper,  METH_NOARGS, NULL },
+    {"get_main_window", (PyCFunction)remmina_plugin_python_get_mainwindow_wrapper,  METH_NOARGS, NULL },
 	/*{"get_datadir", (PyCFunction)remmina_file_get_datadir_wrapper},
 	{"file_new", (PyCFunction)remmina_file_new_wrapper},
 

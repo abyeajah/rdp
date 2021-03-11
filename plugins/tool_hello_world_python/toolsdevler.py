@@ -39,7 +39,7 @@ class HelloPlugin:
         print("open_connection!")
 
         viewport = gp.get_viewport()
-#        viewport = remmina.get_main_window()
+        viewport = remmina.get_main_window()
         def foreach_child(child):
             child.add(self.btn)
             self.btn.show()
