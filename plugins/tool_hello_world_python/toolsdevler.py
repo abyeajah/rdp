@@ -30,14 +30,16 @@ class HelloPlugin:
     def callback_add(self, widget, data):
         print("Click :)")
 
-    def init(self):
+    def init(self, gp):
         print("Init!")
+        remmina.show_dialog(remmina.MESSAGE_INFO, remmina.BUTTONS_CLOSE, "This plugin is brought to you by Python :)")
         return True
 
     def open_connection(self, gp):
         print("open_connection!")
 
         viewport = gp.get_viewport()
+#        viewport = remmina.get_main_window()
         def foreach_child(child):
             child.add(self.btn)
             self.btn.show()

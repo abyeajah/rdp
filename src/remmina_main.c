@@ -1501,14 +1501,23 @@ void remmina_main_update_file_datetime(RemminaFile *file)
 	remmina_main_load_files();
 }
 
-void remmina_main_show_warning_dialog(const gchar *message)
-{
+void remmina_main_show_dialog(GtkMessageType msg, GtkButtonsType buttons, const gchar* message) {
 	GtkWidget *dialog;
 
 	if (remminamain->window) {
-		dialog = gtk_message_dialog_new(remminamain->window, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE,
-						message, g_get_application_name());
+		dialog = gtk_message_dialog_new(remminamain->window, GTK_DIALOG_MODAL, msg, buttons, message);
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 	}
+}
+
+void remmina_main_show_warning_dialog(const gchar *message) {
+    GtkWidget *dialog;
+
+    if (remminamain->window) {
+        dialog = gtk_message_dialog_new(remminamain->window, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE,
+                                        message, g_get_application_name());
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+    }
 }

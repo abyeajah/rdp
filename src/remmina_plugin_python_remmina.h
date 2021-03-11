@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include "pygobject.h"
 #include "remmina_plugin_python_protocol_widget.h"
 
 /**

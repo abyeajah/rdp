@@ -39,6 +39,7 @@
 #include <structmember.h>
 
 #include "config.h"
+#include "remmina_main.h"
 #include "remmina_plugin_manager.h"
 #include "remmina/plugin.h"
 #include "remmina_protocol_widget.h"
@@ -270,6 +271,23 @@ static PyObject* remmina_protocol_widget_get_profile_remote_heigh_wrapper(PyObje
 static PyObject* remmina_protocol_widget_get_profile_remote_width_wrapper(PyObject* self, PyObject* plugin);
 
 /**
+ *
+ * @param self
+ * @param kwds
+ * @param args
+ * @return
+ */
+static PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* kwds, PyObject* args);
+
+/**
+ *
+ * @param self
+ * @param args
+ * @return
+ */
+static PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject* args);
+
+/**
  * @brief The functions of the remmina module.
  *
  * @details If any function has to be added this is the place to do it. This list is referenced
@@ -278,6 +296,8 @@ static PyObject* remmina_protocol_widget_get_profile_remote_width_wrapper(PyObje
 static PyMethodDef remmina_python_module_type_methods[] = {
 	{"register_plugin", (PyCFunction)remmina_register_plugin_wrapper,  METH_O, NULL },
 	{"log_print", (PyCFunction)remmina_plugin_python_log_printf_wrapper,  METH_VARARGS, NULL },
+    {"show_dialog", (PyCFunctionWithKeywords)remmina_plugin_python_show_dialog_wrapper,  METH_VARARGS | METH_KEYWORDS, NULL },
+    //{"get_mainwindow", (PyCFunction)remmina_plugin_python_get_mainwindow_wrapper,  METH_NOARGS, NULL },
 	/*{"get_datadir", (PyCFunction)remmina_file_get_datadir_wrapper},
 	{"file_new", (PyCFunction)remmina_file_new_wrapper},
 
@@ -490,6 +510,20 @@ static PyMODINIT_FUNC remmina_plugin_python_module_initialize(void)
         PyErr_Print();
         return NULL;
     }
+
+    PyModule_AddIntConstant(module, "BUTTONS_CLOSE", (long)GTK_BUTTONS_CLOSE);
+    PyModule_AddIntConstant(module, "BUTTONS_NONE", (long)GTK_BUTTONS_NONE);
+    PyModule_AddIntConstant(module, "BUTTONS_OK", (long)GTK_BUTTONS_OK);
+    PyModule_AddIntConstant(module, "BUTTONS_CLOSE", (long)GTK_BUTTONS_CLOSE);
+    PyModule_AddIntConstant(module, "BUTTONS_CANCEL", (long)GTK_BUTTONS_CANCEL);
+    PyModule_AddIntConstant(module, "BUTTONS_YES_NO", (long)GTK_BUTTONS_YES_NO);
+    PyModule_AddIntConstant(module, "BUTTONS_OK_CANCEL", (long)GTK_BUTTONS_OK_CANCEL);
+
+    PyModule_AddIntConstant(module, "MESSAGE_INFO", (long)GTK_MESSAGE_INFO);
+    PyModule_AddIntConstant(module, "MESSAGE_WARNING", (long)GTK_MESSAGE_WARNING);
+    PyModule_AddIntConstant(module, "MESSAGE_QUESTION", (long)GTK_MESSAGE_QUESTION);
+    PyModule_AddIntConstant(module, "MESSAGE_ERROR", (long)GTK_MESSAGE_ERROR);
+    PyModule_AddIntConstant(module, "MESSAGE_OTHER", (long)GTK_MESSAGE_OTHER);
 
 	PyModule_AddIntConstant(module, "PROTOCOL_SETTING_TYPE_SERVER", (long)REMMINA_PROTOCOL_SETTING_TYPE_SERVER);
 	PyModule_AddIntConstant(module, "PROTOCOL_SETTING_TYPE_PASSWORD", (long)REMMINA_PROTOCOL_SETTING_TYPE_PASSWORD);
@@ -824,4 +858,25 @@ void ToRemminaProtocolFeature(RemminaProtocolFeature* dest, PyObject* feature) {
     GetGeneric(src->opt1, &dest->opt1);
     GetGeneric(src->opt2, &dest->opt2);
     GetGeneric(src->opt3, &dest->opt3);
+}
+
+PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* args, PyObject* kwds) {
+    static char *kwlist[] = { "type", "buttons", "message", NULL };
+    GtkMessageType msgType;
+    GtkButtonsType btnType;
+    gchar* message;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "lls", kwlist
+            ,&msgType
+            ,&btnType
+            ,&message))
+        return -1;
+
+    remmina_main_show_dialog(msgType, btnType, message);
+
+    return Py_None;
+}
+
+PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject* args) {
+    return pygobject_new(remmina_main_get_window());
 }
