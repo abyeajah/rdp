@@ -878,5 +878,10 @@ PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* ar
 }
 
 PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject* args) {
-    return pygobject_new(remmina_main_get_window());
+    GtkWindow* result = remmina_main_get_window();
+
+    if (!result)
+        return Py_None;
+
+    return pygobject_new(result);
 }
