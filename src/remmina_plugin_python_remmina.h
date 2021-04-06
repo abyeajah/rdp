@@ -71,4 +71,16 @@ void remmina_plugin_python_module_init(void);
  */
 PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp);
 
-void ToRemminaProtocolSetting(RemminaProtocolSetting* dest, PyObject* setting);
+/**
+ *
+ * @param dest
+ * @param setting
+ */
+void remmina_plugin_python_to_protocol_setting(RemminaProtocolSetting* dest, PyObject* setting);
+
+/**
+ *
+ * @param dest
+ * @param feature
+ */
+void remmina_plugin_python_to_protocol_feature(RemminaProtocolFeature* dest, PyObject* feature);

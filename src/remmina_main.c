@@ -952,7 +952,7 @@ static void remmina_main_import_file_list(GSList *files)
 	for (element = files; element; element = element->next) {
 		path = (gchar *)element->data;
 		plugin = remmina_plugin_manager_get_import_file_handler(path);
-		if (plugin && (remminafile = plugin->import_func(path)) != NULL && remmina_file_get_string(remminafile, "name")) {
+		if (plugin && (remminafile = plugin->import_func(plugin, path)) != NULL && remmina_file_get_string(remminafile, "name")) {
 			remmina_file_generate_filename(remminafile);
 			remmina_file_save(remminafile);
 			imported = TRUE;
@@ -1021,7 +1021,7 @@ void remmina_main_on_action_tools_export(GSimpleAction *action, GVariant *param,
 		dialog = gtk_file_chooser_dialog_new(plugin->export_hints, remminamain->window,
 						     GTK_FILE_CHOOSER_ACTION_SAVE, _("_Save"), GTK_RESPONSE_ACCEPT, NULL);
 		if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT)
-			plugin->export_func(remminafile, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog)));
+			plugin->export_func(plugin, remminafile, gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog)));
 		gtk_widget_destroy(dialog);
 	} else {
 		dialog = gtk_message_dialog_new(remminamain->window, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,

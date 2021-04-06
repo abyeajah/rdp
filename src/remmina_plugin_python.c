@@ -49,15 +49,11 @@
  * @see http://www.remmina.org/wp for more information.
  */
 
-#include <gtk/gtk.h>
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <structmember.h>
-
 #include "config.h"
 #include "remmina/remmina_trace_calls.h"
+#include "remmina_plugin_python_common.h"
 #include "remmina_plugin_python.h"
-#include "remmina_plugin_python_module.h"
+#include "remmina_plugin_python_remmina.h"
 #include "remmina_plugin_python_protocol_widget.h"
 
 /**
@@ -70,9 +66,6 @@
  */
 static int basename_no_ext(const char* in, char** out);
 
-/**
- *
- */
 void remmina_plugin_python_init(void) {
     TRACE_CALL(__func__);
 

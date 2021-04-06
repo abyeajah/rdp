@@ -32,14 +32,9 @@
  *
  */
 
-#include <glib.h>
-#include <gtk/gtk.h>
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <structmember.h>
-
 #include "remmina/remmina_trace_calls.h"
 #include "remmina_file.h"
+#include "remmina_plugin_python_common.h"
 #include "remmina_plugin_python_remmina_file.h"
 
 typedef struct {

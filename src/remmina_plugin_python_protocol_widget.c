@@ -83,14 +83,7 @@
  * @see http://www.remmina.org/wp for more information.
  */
 
-#include <glib.h>
-#include <gtk/gtk.h>
-#define PY_SSIZE_T_CLEAN
-#include <Python.h>
-#include <structmember.h>
-
-#include "config.h"
-#include "remmina_plugin_manager.h"
+#include "remmina_plugin_python_common.h"
 #include "remmina/plugin.h"
 #include "remmina_protocol_widget.h"
 #include "remmina_file.h"

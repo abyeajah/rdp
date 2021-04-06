@@ -36,13 +36,65 @@
 
 #include "remmina/plugin.h"
 
+
 G_BEGIN_DECLS
 
-RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_file_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_tool_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_secret_plugin(PyObject* pluginInstance);
+
+/**
+ * @brief Handles the initialization of the Python plugin.
+ * @details This function prepares the plugin structure and calls the init method of the
+ * plugin Python class.
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+void remmina_protocol_init_wrapper(RemminaProtocolWidget* gp);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget* gp);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget* gp);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+gboolean remmina_protocol_query_feature_wrapper(RemminaProtocolWidget* gp, const RemminaProtocolFeature* feature);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+void remmina_protocol_call_feature_wrapper(RemminaProtocolWidget* gp, const RemminaProtocolFeature* feature);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolWidget* gp, const guint keystrokes[], const gint keylen);
+
+/**
+ * @brief
+ * @details
+ *
+ * @param   gp  The protocol widget used by the plugin.
+ */
+gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolWidget* gp, RemminaPluginScreenshotData* rpsd);
 
 G_END_DECLS

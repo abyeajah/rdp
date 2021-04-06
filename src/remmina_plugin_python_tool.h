@@ -36,13 +36,13 @@
 
 #include "remmina/plugin.h"
 
+
 G_BEGIN_DECLS
 
-RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_file_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_tool_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyObject* pluginInstance);
-RemminaPlugin* remmina_plugin_python_create_secret_plugin(PyObject* pluginInstance);
+/**
+ * @brief
+ */
+void remmina_plugin_python_tool_exec_func_wrapper(RemminaToolPlugin* instance);
 
 G_END_DECLS
+
