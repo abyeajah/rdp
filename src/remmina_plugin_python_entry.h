@@ -37,8 +37,15 @@
 G_BEGIN_DECLS
 
 /**
+ *
+ */
+void remmina_plugin_python_entry_init(void);
+
+/**
  * @brief
  */
 void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance);
+
+RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* instance);
 
 G_END_DECLS

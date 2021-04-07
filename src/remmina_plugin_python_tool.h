@@ -40,9 +40,21 @@
 G_BEGIN_DECLS
 
 /**
+ *
+ */
+void remmina_plugin_python_tool_init(void);
+
+/**
  * @brief
  */
 void remmina_plugin_python_tool_exec_func_wrapper(RemminaToolPlugin* instance);
+
+/**
+ *
+ * @param instance
+ * @return
+ */
+RemminaPlugin* remmina_plugin_python_create_tool_plugin(PyPlugin* instance);
 
 G_END_DECLS
 

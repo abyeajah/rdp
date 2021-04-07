@@ -37,9 +37,16 @@
 G_BEGIN_DECLS
 
 /**
+ *
+ */
+void remmina_plugin_python_pref_init(void);
+
+/**
  * @brief
  */
-GtkWidget *remmina_plugin_python_pref_get_pref_body_wrapper(RemminaPrefPlugin* instance);
+GtkWidget* remmina_plugin_python_pref_get_pref_body_wrapper(RemminaPrefPlugin* instance);
+
+RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyPlugin* instance);
 
 G_END_DECLS
 

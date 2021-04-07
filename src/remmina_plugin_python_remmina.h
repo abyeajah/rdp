@@ -34,37 +34,17 @@
 
 #pragma once
 
-#include "pygobject.h"
 #include "remmina_plugin_python_protocol_widget.h"
 
-/**
- * @brief Maps an instance of a Python plugin to a Remmina one.
- *
- * @details This is used to map a Python plugin instance to the Remmina plugin one. Also instance specific data as the
- * protocol widget are stored in this struct.
- */
-typedef struct {
-    RemminaProtocolPlugin *protocol_plugin;
-    RemminaFilePlugin* file_plugin;
-    RemminaSecretPlugin* secret_plugin;
-    RemminaToolPlugin* tool_plugin;
-    RemminaEntryPlugin* entry_plugin;
-    RemminaPrefPlugin* pref_plugin;
-    RemminaPlugin* generic_plugin;
-
-    PyRemminaProtocolWidget *gp;
-    PyObject *instance;
-} PyPlugin;
-
-
+G_BEGIN_DECLS
 
 /**
- * @brief Initializes the 'remmina' module in the Python engine.
+ * Initializes the 'remmina' module in the Python engine.
  */
 void remmina_plugin_python_module_init(void);
 
 /**
- * @brief Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
+ * Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
  *
  * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information is explicitly passed. To bridge
  * that, this function can be used to retrieve the very plugin instance owning the given RemminaProtocolWidget.
@@ -72,15 +52,19 @@ void remmina_plugin_python_module_init(void);
 PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp);
 
 /**
+ * Converts the PyObject to RemminaProtocolSetting.
  *
- * @param dest
- * @param setting
+ * @param dest A target for the converted value.
+ * @param setting The source value to convert.
  */
 void remmina_plugin_python_to_protocol_setting(RemminaProtocolSetting* dest, PyObject* setting);
 
 /**
+ * Converts the PyObject to RemminaProtocolFeature.
  *
- * @param dest
- * @param feature
+ * @param dest A target for the converted value.
+ * @param setting The source value to convert.
  */
 void remmina_plugin_python_to_protocol_feature(RemminaProtocolFeature* dest, PyObject* feature);
+
+G_END_DECLS

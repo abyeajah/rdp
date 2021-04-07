@@ -172,8 +172,6 @@ if(WITH_PYTHONLIBS)
 			"remmina_plugin_python_protocol.h"
 			"remmina_plugin_python_common.c"
 			"remmina_plugin_python_common.h"
-			"remmina_plugin_python_module.c"
-			"remmina_plugin_python_module.h"
 			"remmina_plugin_python_remmina.c"
 			"remmina_plugin_python_remmina.h"
 			"remmina_plugin_python_protocol_widget.c"

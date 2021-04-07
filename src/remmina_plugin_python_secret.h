@@ -36,13 +36,22 @@
 
 #include "remmina/plugin.h"
 
-
 G_BEGIN_DECLS
+
+/**
+ *
+ */
+void remmina_plugin_python_secret_init(void);
 
 gboolean remmina_plugin_python_secret_init_wrapper(RemminaSecretPlugin* instance);
 gboolean remmina_plugin_python_secret_is_service_available_wrapper(RemminaSecretPlugin* instance);
-void remmina_plugin_python_secret_store_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar *key, const gchar *password);
-gchar * remmina_plugin_python_secret_get_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar *key);
-void remmina_plugin_python_secret_delete_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar *key);
+void
+remmina_plugin_python_secret_store_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key, const gchar* password);
+gchar*
+remmina_plugin_python_secret_get_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key);
+void
+remmina_plugin_python_secret_delete_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key);
+
+RemminaPlugin* remmina_plugin_python_create_secret_plugin(PyPlugin* instance);
 
 G_END_DECLS

@@ -34,6 +34,10 @@
 
 #pragma once
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// I N C L U D E S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include <glib.h>
 #include <gtk/gtk.h>
 #define PY_SSIZE_T_CLEAN
@@ -41,21 +45,16 @@
 #include <glib.h>
 #include <Python.h>
 #include <structmember.h>
+#include "pygobject.h"
 
 #include "remmina/plugin.h"
-
-#ifdef WITH_TRACE_CALLS
-#define CallPythonMethod(instance, name, params, ...)                             \
-    remmina_plugin_python_last_result_set(PyObject_CallMethod(instance, name, params, ##__VA_ARGS__)); \
-    remmina_plugin_python_log_method_call(instance, name);                                          \
-    remmina_plugin_python_check_error()
-#else
-#define CallPythonMethod(instance, name, params, ...)                             \
-    PyObject_CallMethod(instance, name, params, ##__VA_ARGS__); \
-    remmina_plugin_python_check_error()
-#endif // WITH_TRACE_CALLS
+#include "config.h"
 
 G_BEGIN_DECLS
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// D E C L A R A T I O N S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern const gchar* ATTR_NAME;
 extern const gchar* ATTR_ICON_NAME;
@@ -70,20 +69,96 @@ extern const gchar* ATTR_EXPORT_HINTS;
 extern const gchar* ATTR_PREF_LABEL;
 extern const gchar* ATTR_INIT_ORDER;
 
-PyObject *remmina_plugin_python_last_result();
-PyObject *remmina_plugin_python_last_result_set(PyObject *result);
+#ifdef WITH_TRACE_CALLS
+#define CallPythonMethod(instance, name, params, ...)                             \
+	remmina_plugin_python_last_result_set(PyObject_CallMethod(instance, name, params, ##__VA_ARGS__)); \
+	remmina_plugin_python_log_method_call(instance, name);                                          \
+	remmina_plugin_python_check_error()
+#else
+#define CallPythonMethod(instance, name, params, ...)           \
+    PyObject_CallMethod(instance, name, params, ##__VA_ARGS__); \
+    remmina_plugin_python_check_error()
+#endif // WITH_TRACE_CALLS
 
-void remmina_plugin_python_log_method_call(PyObject* instance, const gchar *method);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// T Y P E S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * The Python abstraction of the protocol widget struct.
+ *
+ * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
+ * native plugins.
+ */
+typedef struct
+{
+	PyObject_HEAD
+	RemminaProtocolWidget* gp;
+} PyRemminaProtocolWidget;
+
+/**
+ * Maps an instance of a Python plugin to a Remmina one.
+ *
+ * @details This is used to map a Python plugin instance to the Remmina plugin one. Also instance specific data as the
+ * protocol widget are stored in this struct.
+ */
+typedef struct
+{
+	RemminaProtocolPlugin* protocol_plugin;
+	RemminaFilePlugin* file_plugin;
+	RemminaSecretPlugin* secret_plugin;
+	RemminaToolPlugin* tool_plugin;
+	RemminaEntryPlugin* entry_plugin;
+	RemminaPrefPlugin* pref_plugin;
+	RemminaPlugin* generic_plugin;
+	PyRemminaProtocolWidget* gp;
+	PyObject* instance;
+} PyPlugin;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Gets the result of the last python method call.
+ */
+PyObject* remmina_plugin_python_last_result();
+
+/**
+ * Sets the result of the last python method call.
+ * @return Returns the passed result (it's done to be compatible with the CallPythonMethod macro).
+ */
+PyObject* remmina_plugin_python_last_result_set(PyObject* result);
+
+/**
+ * Prints a log message to inform the user a python message has been called.
+ * @param instance The instance that contains the called method.
+ * @param method The name of the method called.
+ */
+void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* method);
 
 /**
  * @brief Checks if an error has occurred and prints it.
- *
  * @return Returns TRUE if an error has occurred.
  */
 gboolean remmina_plugin_python_check_error();
 
-long remmina_plugin_python_to_enum_or_default(PyObject *instance, gchar *constant_name, long def);
+/**
+ * Gets the attribute as long value.
+ * @param instance The instance of the object to get the attribute.
+ * @param constant_name The name of the attribute to get.
+ * @param def The value to return if the attribute doesn't exist or is not set.
+ * @return The value attribute as long.
+ */
+long remmina_plugin_python_get_attribute_long(PyObject* instance, gchar* attr_name, long def);
 
+/**
+ * Checks if a given attribute exists.
+ * @param instance The object to check for the attribute.
+ * @param attr_name The name of the attribute to check.
+ * @return Returns TRUE if the attribute exists.
+ */
 gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* attr_name);
 
 G_END_DECLS

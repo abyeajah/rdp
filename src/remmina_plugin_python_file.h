@@ -36,9 +36,16 @@
 
 G_BEGIN_DECLS
 
-gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar *from_file);
-RemminaFile * remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar * from_file);
-gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile *file);
-gboolean remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile *file, const gchar *to_file);
+/**
+ *
+ */
+void remmina_plugin_python_file_init(void);
+
+gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
+RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
+gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file);
+gboolean
+remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file, const gchar* to_file);
+RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* instance);
 
 G_END_DECLS

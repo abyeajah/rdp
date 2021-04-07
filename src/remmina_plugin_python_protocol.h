@@ -36,9 +36,12 @@
 
 #include "remmina/plugin.h"
 
-
 G_BEGIN_DECLS
 
+/**
+ *
+ */
+void remmina_plugin_python_protocol_init(void);
 
 /**
  * @brief Handles the initialization of the Python plugin.
@@ -96,5 +99,15 @@ void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolWidget* gp, const gu
  * @param   gp  The protocol widget used by the plugin.
  */
 gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolWidget* gp, RemminaPluginScreenshotData* rpsd);
+
+RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin);
+
+/**
+ * @brief Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
+ *
+ * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information is explicitly passed. To bridge
+ * that, this function can be used to retrieve the very plugin instance owning the given RemminaProtocolWidget.
+ */
+PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp);
 
 G_END_DECLS
