@@ -4,6 +4,7 @@
 
 #include "remmina_plugin_python_common.h"
 #include "remmina_plugin_python_file.h"
+#include "remmina_plugin_python_remmina_file.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // D E C L A R A T I O N S
@@ -23,7 +24,7 @@ void remmina_plugin_python_file_init(void)
 	plugin_map = g_ptr_array_new();
 }
 
-PyPlugin* get_plugin(RemminaToolPlugin* instance)
+static PyPlugin* get_plugin(RemminaToolPlugin* instance)
 {
 	guint index = 0;
 	for (int i = 0; i < plugin_map->len; ++i)
@@ -57,7 +58,7 @@ RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* i
 gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file)
 {
 	PyPlugin* plugin = get_plugin(instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "export_test_func", "s", to_file);
+	PyObject* result = CallPythonMethod(plugin->instance, "export_test_func", "O", remmina_plugin_python_remmina_file_to_python(file));
 	return result == Py_None || result != Py_False;
 }
 

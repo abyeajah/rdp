@@ -14,7 +14,7 @@ void remmina_plugin_python_tool_init(void)
 	plugin_map = g_ptr_array_new();
 }
 
-PyPlugin* get_plugin(RemminaToolPlugin* instance)
+static PyPlugin* get_plugin(RemminaToolPlugin* instance)
 {
 	guint index = 0;
 	for (int i = 0; i < plugin_map->len; ++i)

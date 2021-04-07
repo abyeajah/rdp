@@ -9,7 +9,7 @@
 GPtrArray* plugin_map;
 
 
-PyPlugin* get_plugin(RemminaSecretPlugin* instance)
+static PyPlugin* get_plugin(RemminaSecretPlugin* instance)
 {
 	guint index = 0;
 	for (int i = 0; i < plugin_map->len; ++i)
