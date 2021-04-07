@@ -23,25 +23,50 @@ void remmina_plugin_python_file_init(void)
 	plugin_map = g_ptr_array_new();
 }
 
+PyPlugin* get_plugin(RemminaToolPlugin* instance)
+{
+	guint index = 0;
+	for (int i = 0; i < plugin_map->len; ++i)
+	{
+		PyPlugin* plugin = (PyPlugin*)g_ptr_array_index(plugin_map, i);
+		if (!plugin->generic_plugin || !plugin->generic_plugin->name)
+			continue;
+		if (g_str_equal(instance->name, plugin->generic_plugin->name))
+		{
+			return plugin;
+		}
+	}
+	g_printerr("[%s:%d]: No plugin named %s!\n", __FILE__, __LINE__, instance->name);
+	return NULL;
+}
+
 gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file)
 {
-	return FALSE;
+	PyPlugin* plugin = get_plugin(instance);
+	PyObject* result = CallPythonMethod(plugin->instance, "import_test_func", "s", from_file);
+	return result == Py_None || result != Py_False;
 }
 
 RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file)
 {
-	return NULL;
+	PyPlugin* plugin = get_plugin(instance);
+	PyObject* result = CallPythonMethod(plugin->instance, "import_func", "s", from_file);
+	return result == Py_None || result != Py_False;
 }
 
 gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file)
 {
-	return FALSE;
+	PyPlugin* plugin = get_plugin(instance);
+	PyObject* result = CallPythonMethod(plugin->instance, "export_test_func", "s", to_file);
+	return result == Py_None || result != Py_False;
 }
 
 gboolean
 remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file, const gchar* to_file)
 {
-	return FALSE;
+	PyPlugin* plugin = get_plugin(instance);
+	PyObject* result = CallPythonMethod(plugin->instance, "export_func", "s", to_file);
+	return result == Py_None || result != Py_False;
 }
 
 RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* plugin)
@@ -74,3 +99,5 @@ RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* plugin)
 
 	return remmina_plugin;
 }
+
+

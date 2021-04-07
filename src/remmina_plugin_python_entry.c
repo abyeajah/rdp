@@ -31,7 +31,7 @@ void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance
 		return;
 	}
 
-	CallPythonMethod(plugin->instance, "entry_func", plugin->instance);
+	CallPythonMethod(plugin->instance, "entry_func", NULL);
 }
 
 RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* plugin)

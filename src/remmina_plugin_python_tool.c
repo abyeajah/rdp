@@ -14,9 +14,27 @@ void remmina_plugin_python_tool_init(void)
 	plugin_map = g_ptr_array_new();
 }
 
+PyPlugin* get_plugin(RemminaToolPlugin* instance)
+{
+	guint index = 0;
+	for (int i = 0; i < plugin_map->len; ++i)
+	{
+		PyPlugin* plugin = (PyPlugin*)g_ptr_array_index(plugin_map, i);
+		if (!plugin->generic_plugin || !plugin->generic_plugin->name)
+			continue;
+		if (g_str_equal(instance->name, plugin->generic_plugin->name))
+		{
+			return plugin;
+		}
+	}
+	g_printerr("[%s:%d]: No plugin named %s!\n", __FILE__, __LINE__, instance->name);
+	return NULL;
+}
+
 void remmina_plugin_python_tool_exec_func_wrapper(RemminaToolPlugin* instance)
 {
-
+	PyPlugin* plugin = get_plugin(instance);
+	CallPythonMethod(plugin->instance, "exec_func", NULL);
 }
 
 RemminaPlugin* remmina_plugin_python_create_tool_plugin(PyPlugin* plugin)
