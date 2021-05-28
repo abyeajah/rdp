@@ -1407,12 +1407,19 @@ static gboolean remmina_rdp_main(RemminaProtocolWidget *gp)
 
 	rfi->settings->GlyphSupportLevel = (remmina_plugin_service->file_get_int(remminafile, "glyph-cache", 0) ? GLYPH_SUPPORT_FULL : GLYPH_SUPPORT_NONE);
 
-	/* ClientHostname is internally preallocated to 32 bytes by libfreerdp */
+#if FREERDP_CHECK_VERSION(2, 3, 1)
+	if ((cs = remmina_plugin_service->file_get_string(remminafile, "clientname")))
+		freerdp_settings_set_string(rfi->settings, FreeRDP_ClientHostname, cs);
+	else
+		freerdp_settings_set_string(rfi->settings, FreeRDP_ClientHostname, g_get_host_name());
+#else
+	/* ClientHostname is internally preallocated to 32 bytes by libfreerdp before commit c67e4df96bf69c117d5b186653d6482b61c48ba6 */
 	if ((cs = remmina_plugin_service->file_get_string(remminafile, "clientname")))
 		strncpy(rfi->settings->ClientHostname, cs, FREERDP_CLIENTHOSTNAME_LEN - 1);
 	else
 		strncpy(rfi->settings->ClientHostname, g_get_host_name(), FREERDP_CLIENTHOSTNAME_LEN - 1);
 	rfi->settings->ClientHostname[FREERDP_CLIENTHOSTNAME_LEN - 1] = 0;
+#endif
 
 	/* Client Build number is optional, if not specified defaults to 0, allow for comments to appear after number */
 	if ((cs = remmina_plugin_service->file_get_string(remminafile, "clientbuild")))
