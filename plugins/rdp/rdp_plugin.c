@@ -602,7 +602,7 @@ static BOOL remmina_rdp_post_connect(freerdp *instance)
 
 	if (rfi->bpp == 32) {
 		freerdp_local_color_format = PIXEL_FORMAT_BGRA32;
-		rfi->cairo_format = CAIRO_FORMAT_ARGB32;
+		rfi->cairo_format = CAIRO_FORMAT_RGB24;
 	} else if (rfi->bpp == 24) {
 		/* CAIRO_FORMAT_RGB24 is 32bit aligned, so we map it to libfreerdp’s PIXEL_FORMAT_BGRX32 */
 		freerdp_local_color_format = PIXEL_FORMAT_BGRX32;
