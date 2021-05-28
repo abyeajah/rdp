@@ -430,10 +430,9 @@ void remmina_icon_init(void)
 	char msg[200];
 
 	if (remmina_pref.dark_tray_icon)
-		g_stpcpy(remmina_panel, "remmina-panel-inverted");
+		g_stpcpy(remmina_panel, "remmina-dark-panel");
 	else
 		g_stpcpy(remmina_panel, "remmina-panel");
-
 
 	/* Print on stdout the availability of appindicators on DBUS */
 	sni_supported = remmina_sysinfo_is_appindicator_available();
