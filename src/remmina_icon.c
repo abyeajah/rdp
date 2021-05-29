@@ -430,7 +430,7 @@ void remmina_icon_init(void)
 	char msg[200];
 
 	if (remmina_pref.dark_tray_icon)
-		g_stpcpy(remmina_panel, "remmina-dark-panel");
+		g_stpcpy(remmina_panel, "remmina-panel-inverted");
 	else
 		g_stpcpy(remmina_panel, "remmina-panel");
 
