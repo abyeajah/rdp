@@ -50,8 +50,20 @@
 #include "remmina_plugin_python_secret.h"
 #include "remmina_plugin_python_pref.h"
 
+#include "remmina_pref.h"
+#include "remmina_ssh.h"
+#include "remmina_file_manager.h"
+
+#include <string.h>
+
 /**
- *
+ * @file remmina_plugin_python_remmina.c
+ * @brief Contains the API used by the Python modules.
+ * @author Mathias Winterhalter
+ */
+
+/**
+ * Util function to check if a specific member is define in a Python object.
  */
 gboolean remmina_plugin_python_check_mandatory_member(PyObject* instance, const gchar* member);
 
@@ -59,24 +71,24 @@ static PyObject* remmina_plugin_python_log_printf_wrapper(PyObject* self, PyObje
 static PyObject* remmina_register_plugin_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_plugin_python_get_viewport(PyObject* self, PyObject* handle);
 static PyObject* remmina_file_get_datadir_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_file_new_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_pref_set_value_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_pref_get_value_wrapper(PyObject* self, PyObject* plugin);
+static PyObject* remmina_file_new_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_pref_set_value_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_pref_get_value_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
 static PyObject* remmina_pref_get_scale_quality_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_pref_get_sshtunnel_port_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_pref_get_ssh_loglevel_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_pref_get_ssh_parseconfig_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_log_printf_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject* plugin);
+static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_log_printf_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
 static PyObject* rcw_open_from_file_full_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_public_get_server_port_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_masterthread_exec_is_main_thread_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_gtksocket_available_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_protocol_widget_get_profile_remote_heigh_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_protocol_widget_get_profile_remote_width_wrapper(PyObject* self, PyObject* plugin);
-static PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* kwds, PyObject* args);
+static PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
 static PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject* args);
 
 static PyMethodDef remmina_python_module_type_methods[] = {
@@ -133,7 +145,7 @@ static PyModuleDef remmina_python_module_type = {
 
 // -- Python Object -> Setting
 
-static PyObject* python_protocol_setting_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
+static PyObject* python_protocol_setting_new(PyTypeObject* type, PyObject* args, PyObject* kwargs)
 {
 	PyRemminaProtocolSetting* self = (PyRemminaProtocolSetting*)type->tp_alloc(type, 0);
 
@@ -152,14 +164,16 @@ static PyObject* python_protocol_setting_new(PyTypeObject* type, PyObject* args,
 	return (PyObject*)self;
 }
 
-static int python_protocol_setting_init(PyRemminaProtocolSetting* self, PyObject* args, PyObject* kwds)
+static int python_protocol_setting_init(PyRemminaProtocolSetting* self, PyObject* args, PyObject* kwargs)
 {
 	static char* kwlist[] = { "type", "name", "label", "compact", "opt1", "opt2", NULL };
-	PyObject* name, * label;
-
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|lOOpOO", kwlist, &self->settingType, &name, &label, &self
+	PyObject* name, *label;
+	
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|lOOpOO", kwlist, &self->settingType, &name, &label, &self
 		->compact, &self->opt1, &self->opt2))
+	{
 		return -1;
+	}
 
 	Py_ssize_t len = PyUnicode_GetLength(label);
 	if (len == 0)
@@ -168,9 +182,16 @@ static int python_protocol_setting_init(PyRemminaProtocolSetting* self, PyObject
 	}
 	else
 	{
-		self->label = g_malloc(sizeof(char) * (len + 1));
-		self->label[len] = 0;
-		memcpy(self->label, PyUnicode_AsUTF8(label), len);
+		const char* py_label = PyUnicode_AsUTF8(label);
+		if (py_label) {
+			const int label_size = sizeof(char) * (len + 1);
+			self->label = g_malloc(label_size);
+			self->label[len] = '\0';
+			memcpy(self->label, PyUnicode_AsUTF8(label), len);
+		} else {
+			g_printerr("Unable to extract label during initialization of Python settins module!\n");
+			remmina_plugin_python_check_error();
+		}
 	}
 
 	len = PyUnicode_GetLength(name);
@@ -180,12 +201,19 @@ static int python_protocol_setting_init(PyRemminaProtocolSetting* self, PyObject
 	}
 	else
 	{
-		self->name = g_malloc(sizeof(char) * (len + 1));
-		self->name[len] = 0;
-		memcpy(self->name, PyUnicode_AsUTF8(name), len);
+		const char* py_name = PyUnicode_AsUTF8(name);
+		if (py_name) {
+			const int name_size = sizeof(char) * (len + 1);
+			self->name = g_malloc(name_size);
+			self->name[len] = '\0';
+			memcpy(self->name, PyUnicode_AsUTF8(name), len);
+		} else {
+			g_printerr("Unable to extract label during initialization of Python settins module!\n");
+			remmina_plugin_python_check_error();
+		}
 	}
 
-	return 0;
+	return NULL;
 }
 
 static PyMemberDef python_protocol_setting_type_members[] = {
@@ -247,11 +275,11 @@ static PyObject* python_protocol_feature_new(PyTypeObject* type, PyObject* kws, 
 	return (PyObject*)self;
 }
 
-static int python_protocol_feature_init(PyRemminaProtocolFeature* self, PyObject* args, PyObject* kwds)
+static int python_protocol_feature_init(PyRemminaProtocolFeature* self, PyObject* args, PyObject* kwargs)
 {
 	static char* kwlist[] = { "type", "id", "opt1", "opt2", "opt3", NULL };
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|llOOO", kwlist, &self->type, &self->id, &self->opt1, &self
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|llOOO", kwlist, &self->type, &self->id, &self->opt1, &self
 		->opt2, &self->opt3))
 		return -1;
 
@@ -486,61 +514,134 @@ static PyObject* remmina_register_plugin_wrapper(PyObject* self, PyObject* plugi
 
 static PyObject* remmina_file_get_datadir_wrapper(PyObject* self, PyObject* plugin)
 {
+	PyObject* result = Py_None;
+	const gchar* datadir = remmina_file_get_datadir();
+	
+	if (datadir) {
+		result = PyUnicode_FromFormat("%s", datadir);
+	}
+
+	remmina_plugin_python_check_error();
 	return Py_None;
 }
 
-static PyObject* remmina_file_new_wrapper(PyObject* self, PyObject* plugin)
+static PyObject* remmina_file_new_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
 {
+	PyObject* result = Py_None;
+	RemminaFile* file = remmina_file_new();
+	if (file) {
+		result = (PyObject*)file;
+	}
+	
+	remmina_plugin_python_check_error();
+	return result;
+}
+
+static PyObject* remmina_pref_set_value_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
+{
+	static char* kwlist[] = { "key", "value", NULL };
+	gchar* key, value;
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss", kwlist, &key, &value))
+		return Py_None;
+
+	if (key) {
+		remmina_pref_set_value(key, value);
+	}	
+
+	remmina_plugin_python_check_error();
 	return Py_None;
 }
 
-static PyObject* remmina_pref_set_value_wrapper(PyObject* self, PyObject* plugin)
+static PyObject* remmina_pref_get_value_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
 {
-	return Py_None;
-}
+	static char* kwlist[] = { "key", NULL };
+	gchar* key;
+	PyObject* result = Py_None;
 
-static PyObject* remmina_pref_get_value_wrapper(PyObject* self, PyObject* plugin)
-{
-	return Py_None;
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s", kwlist, &key))
+		return Py_None;
+
+	if (key) {
+		const gchar* value = remmina_pref_get_value(key);
+		if (value) {
+			result = PyUnicode_FromFormat("%s", result);
+		}
+	}	
+
+	remmina_plugin_python_check_error();
+	return result;
 }
 
 static PyObject* remmina_pref_get_scale_quality_wrapper(PyObject* self, PyObject* plugin)
 {
-	return Py_None;
+	PyObject* result = PyLong_FromLong(remmina_pref_get_scale_quality());
+	remmina_plugin_python_check_error();
+	return result;
 }
 
 static PyObject* remmina_pref_get_sshtunnel_port_wrapper(PyObject* self, PyObject* plugin)
 {
-	return Py_None;
+	PyObject* result = PyLong_FromLong(remmina_pref_get_sshtunnel_port());
+	remmina_plugin_python_check_error();
+	return result;
 }
 
 static PyObject* remmina_pref_get_ssh_loglevel_wrapper(PyObject* self, PyObject* plugin)
 {
-	return Py_None;
+	PyObject* result = PyLong_FromLong(remmina_pref_get_ssh_loglevel());
+	remmina_plugin_python_check_error();
+	return result;
 }
 
 static PyObject* remmina_pref_get_ssh_parseconfig_wrapper(PyObject* self, PyObject* plugin)
 {
+	PyObject* result = PyLong_FromLong(remmina_pref_get_ssh_parseconfig());
+	remmina_plugin_python_check_error();
+	return result;
+}
+
+static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
+{
+	static char* kwlist[] = { "keymap", "keyval", NULL };
+	gchar* keymap;
+	guint keyval;
+	PyObject* result = Py_None;
+
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sl", kwlist, &keymap, &keyval))
+		return PyLong_FromLong(-1);
+
+	if (keymap) {
+		const guint value = remmina_pref_keymap_get_keyval(keymap, keyval);
+		result = PyLong_FromUnsignedLong(value);
+	}
+
+	remmina_plugin_python_check_error();
+	return result;
+}
+
+static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
+{
+	static char kwlist[] = { "text", NULL };
+	gchar* text;
+
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "s", &text) && text) {
+		remmina_log_print(text);
+	}
+
 	return Py_None;
 }
 
-static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject* plugin)
+static PyObject* remmina_log_printf_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
 {
 	return Py_None;
 }
 
-static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject* plugin)
+static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
 {
-	return Py_None;
-}
+	static char* kwlist[] = { "O", NULL };
+	PyObject* widget;
 
-static PyObject* remmina_log_printf_wrapper(PyObject* self, PyObject* plugin)
-{
-	return Py_None;
-}
-
-static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject* plugin)
-{
 	return Py_None;
 }
 
@@ -656,14 +757,14 @@ void remmina_plugin_python_to_protocol_feature(RemminaProtocolFeature* dest, PyO
 	to_generic(src->opt3, &dest->opt3);
 }
 
-PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* args, PyObject* kwds)
+PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
 {
 	static char* kwlist[] = { "type", "buttons", "message", NULL };
 	GtkMessageType msgType;
 	GtkButtonsType btnType;
 	gchar* message;
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "lls", kwlist, &msgType, &btnType, &message))
+	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "lls", kwlist, &msgType, &btnType, &message))
 		return PyLong_FromLong(-1);
 
 	remmina_main_show_dialog(msgType, btnType, message);

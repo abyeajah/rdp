@@ -34,7 +34,7 @@
 
 /**
  * @file remmina_plugin_python_common.c
- * @brief
+ * @brief Contains the implementation of common used functions regarding Python and Remmina.
  * @author Mathias Winterhalter
  * @date 07.04.2021
  */
@@ -93,7 +93,7 @@ gboolean remmina_plugin_python_check_error()
 
 void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* method)
 {
-	g_print("Python@%ld: %s.%s() -> %s\n",
+	g_print("Python@%ld: %s.%s(...) -> %s\n",
 		PyObject_Hash(instance),
 		instance->ob_type->tp_name,
 		method,

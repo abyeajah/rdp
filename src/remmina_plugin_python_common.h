@@ -69,16 +69,22 @@ extern const gchar* ATTR_EXPORT_HINTS;
 extern const gchar* ATTR_PREF_LABEL;
 extern const gchar* ATTR_INIT_ORDER;
 
-#ifdef WITH_TRACE_CALLS
+/**
+ * If WITH_PYTHON_TRACE_CALLS is defined, it logs the calls to the Python code and logs errors in case.
+ */
+#ifdef WITH_PYTHON_TRACE_CALLS
 #define CallPythonMethod(instance, name, params, ...)                             \
-	remmina_plugin_python_last_result_set(PyObject_CallMethod(instance, name, params, ##__VA_ARGS__)); \
-	remmina_plugin_python_log_method_call(instance, name);                                          \
-	remmina_plugin_python_check_error()
+		remmina_plugin_python_last_result_set(PyObject_CallMethod(instance, name, params, ##__VA_ARGS__)); \
+		remmina_plugin_python_log_method_call(instance, name);                                          \
+		remmina_plugin_python_check_error()
 #else
+/**
+ * If WITH_TRACE_CALL is not defined, it still logs errors but doesn't print the call anymore.
+ */
 #define CallPythonMethod(instance, name, params, ...)           \
     PyObject_CallMethod(instance, name, params, ##__VA_ARGS__); \
     remmina_plugin_python_check_error()
-#endif // WITH_TRACE_CALLS
+#endif // WITH_PYTHON_TRACE_CALLS
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,30 +139,38 @@ PyObject* remmina_plugin_python_last_result_set(PyObject* result);
 
 /**
  * Prints a log message to inform the user a python message has been called.
+ *
+ * @detail This method is called from the CALL_PYTHON macro if WITH_PYTHON_TRACE_CALLS is defined.
+ *
  * @param instance The instance that contains the called method.
  * @param method The name of the method called.
  */
 void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* method);
 
 /**
- * @brief Checks if an error has occurred and prints it.
+ * Checks if an error has occurred and prints it.
+ *
  * @return Returns TRUE if an error has occurred.
  */
 gboolean remmina_plugin_python_check_error();
 
 /**
  * Gets the attribute as long value.
+ *
  * @param instance The instance of the object to get the attribute.
  * @param constant_name The name of the attribute to get.
  * @param def The value to return if the attribute doesn't exist or is not set.
+ *
  * @return The value attribute as long.
  */
 long remmina_plugin_python_get_attribute_long(PyObject* instance, gchar* attr_name, long def);
 
 /**
  * Checks if a given attribute exists.
+ *
  * @param instance The object to check for the attribute.
  * @param attr_name The name of the attribute to check.
+ *
  * @return Returns TRUE if the attribute exists.
  */
 gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* attr_name);

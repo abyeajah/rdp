@@ -70,10 +70,10 @@ static const gchar* python_init_commands[] = {
 	NULL // Sentinel
 };
 
-static const gchar* ERR_CANT_EXTRACT_FILENAME_FMT = "[%s:%s]: Can not extract filename from '%s'!\n";
-static const gchar* ERR_CONVERT_PLUGIN_FILENAME_FMT = "[%s:%s]: Error converting plugin filename to PyUnicode!\n";
-static const gchar* ERR_FAILED_ALLOC_FMT = "[%s:%s]: Failed allocating %d bytes!\n";
-static const gchar* ERR_LOAD_PLUGIN = "[%s:%s]: Failed to load python plugin file: '%s'\n";
+static const gchar* ERR_CANT_EXTRACT_FILENAME_FMT = "[%s:%d]: Can not extract filename from '%s'!\n";
+static const gchar* ERR_CONVERT_PLUGIN_FILENAME_FMT = "[%s:%d]: Error converting plugin filename to PyUnicode!\n";
+static const gchar* ERR_FAILED_ALLOC_FMT = "[%s:%d]: Failed allocating %d bytes!\n";
+static const gchar* ERR_LOAD_PLUGIN = "[%s:%d]: Failed to load python plugin file: '%s'\n";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // U T I L S
