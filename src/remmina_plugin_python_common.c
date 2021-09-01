@@ -45,14 +45,17 @@
 
 #include "remmina_plugin_python_common.h"
 
+#include <assert.h>
+#include <stdio.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // D E C L A R A T I O N S
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PyObject* __last_result;
 
-static const gchar* MISSING_ATTR_ERROR_FMT =
-	"Error creating Remmina plugin. Python plugin instance is missing member: %s\n";
+static const gchar* MISSING_ATTR_ERROR_FMT = "Python plugin instance is missing member: %s\n";
+static const gchar* MALLOC_RETURNED_NULL_ERROR_FMT = "Unable to allocate %d in memory!\n";
 
 const gchar* ATTR_NAME = "name";
 const gchar* ATTR_ICON_NAME = "icon_name";
@@ -67,11 +70,13 @@ const gchar* ATTR_EXPORT_HINTS = "export_hints";
 const gchar* ATTR_PREF_LABEL = "pref_label";
 const gchar* ATTR_INIT_ORDER = "init_order";
 
+static const int REASONABLE_LIMIT_FOR_MALLOC = 1024 * 1024;
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // A P I
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PyObject* remmina_plugin_python_last_result()
+PyObject* remmina_plugin_python_last_result(void)
 {
 	return __last_result;
 }
@@ -81,7 +86,7 @@ PyObject* remmina_plugin_python_last_result_set(PyObject* last_result)
 	return __last_result = last_result;
 }
 
-gboolean remmina_plugin_python_check_error()
+gboolean remmina_plugin_python_check_error(void)
 {
 	if (PyErr_Occurred())
 	{
@@ -123,4 +128,19 @@ gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* 
 
 	g_printerr(MISSING_ATTR_ERROR_FMT, attr_name);
 	return FALSE;
+}
+
+void* remmina_plugin_python_malloc(int bytes)
+{
+	assert(bytes > 0);
+	assert(bytes <= REASONABLE_LIMIT_FOR_MALLOC);
+	void* result = malloc(bytes);
+
+	if (!result)
+	{
+		g_printerr(MALLOC_RETURNED_NULL_ERROR_FMT, bytes);
+		perror("malloc");
+	}
+
+	return result;
 }

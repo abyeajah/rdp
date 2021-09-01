@@ -126,10 +126,11 @@ typedef struct
 // A P I
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 /**
  * Gets the result of the last python method call.
  */
-PyObject* remmina_plugin_python_last_result();
+PyObject* remmina_plugin_python_last_result(void);
 
 /**
  * Sets the result of the last python method call.
@@ -152,7 +153,7 @@ void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* meth
  *
  * @return Returns TRUE if an error has occurred.
  */
-gboolean remmina_plugin_python_check_error();
+gboolean remmina_plugin_python_check_error(void);
 
 /**
  * Gets the attribute as long value.
@@ -174,5 +175,14 @@ long remmina_plugin_python_get_attribute_long(PyObject* instance, gchar* attr_na
  * @return Returns TRUE if the attribute exists.
  */
 gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* attr_name);
+
+/**
+ * Allocates memory and checks for errors before returning.
+ *
+ * @param bytes Amount of bytes to allocate.
+ *
+ * @return Address to the allocated memory.
+ */
+void* remmina_plugin_python_malloc(int bytes);
 
 G_END_DECLS

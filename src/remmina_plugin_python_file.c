@@ -79,7 +79,7 @@ RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* plugin)
 		return NULL;
 	}
 
-	RemminaFilePlugin* remmina_plugin = (RemminaFilePlugin*)malloc(sizeof(RemminaFilePlugin));
+	RemminaFilePlugin* remmina_plugin = (RemminaFilePlugin*)remmina_plugin_python_malloc(sizeof(RemminaFilePlugin));
 
 	remmina_plugin->type = REMMINA_PLUGIN_TYPE_FILE;
 	remmina_plugin->domain = GETTEXT_PACKAGE;

@@ -46,6 +46,11 @@ void remmina_plugin_python_entry_init(void);
  */
 void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance);
 
+/**
+ *
+ * @param instance
+ * @return
+ */
 RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* instance);
 
 G_END_DECLS

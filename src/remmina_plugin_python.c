@@ -103,7 +103,7 @@ static int basename_no_ext(const gchar* in, gchar** out)
 
 	const int length = base_end - base;
 	const int memsize = sizeof(gchar*) * ((length) + 1);
-	*out = (gchar*)malloc(memsize);
+	*out = (gchar*)remmina_plugin_python_malloc(memsize);
 	memset(*out, 0, memsize);
 	strncpy(*out, base, length);
 	(*out)[length] = '\0';
@@ -152,7 +152,13 @@ gboolean remmina_plugin_python_load(RemminaPluginService* service, const gchar* 
 
 	wchar_t* program_name = NULL;
 	Py_ssize_t len = PyUnicode_AsWideChar(plugin_name, program_name, 0);
-	program_name = (wchar_t*)malloc(sizeof(wchar_t) * len);
+	if (len <= 0)
+	{
+		g_printerr(ERR_FAILED_ALLOC_FMT, __FILE__, __LINE__, (sizeof(wchar_t) * len));
+		return FALSE;
+	}
+
+	program_name = (wchar_t*)remmina_plugin_python_malloc(sizeof(wchar_t) * len);
 	if (!program_name)
 	{
 		g_printerr(ERR_FAILED_ALLOC_FMT, __FILE__, __LINE__, (sizeof(wchar_t) * len));
