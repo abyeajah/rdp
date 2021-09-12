@@ -49,7 +49,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#define PY_SSIZE_T_CLEAN
+
 #include <Python.h>
 #include <glib.h>
 #include <Python.h>
@@ -63,11 +63,12 @@
 #include "remmina/plugin.h"
 #include "config.h"
 
-G_BEGIN_DECLS
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // D E C L A R A T I O N S
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+G_BEGIN_DECLS
 
 extern const gchar* ATTR_NAME;
 extern const gchar* ATTR_ICON_NAME;
@@ -105,18 +106,18 @@ extern const gchar* ATTR_INIT_ORDER;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * The Python abstraction of the protocol widget struct.
+ * @brief 	The Python abstraction of the protocol widget struct.
  *
  * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
- * native plugins.
+ * 			native plugins.
  */
 typedef struct { PyObject_HEAD RemminaProtocolWidget* gp; } PyRemminaProtocolWidget;
 
 /**
- * Maps an instance of a Python plugin to a Remmina one.
+ * @brief 	Maps an instance of a Python plugin to a Remmina one.
  *
  * @details This is used to map a Python plugin instance to the Remmina plugin one. Also instance specific data as the
- * protocol widget are stored in this struct.
+ * 			protocol widget are stored in this struct.
  */
 typedef struct
 {
@@ -165,13 +166,13 @@ void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* meth
 gboolean remmina_plugin_python_check_error(void);
 
 /**
- * Gets the attribute as long value.
+ * @brief 	Gets the attribute as long value.
  *
- * @param instance The instance of the object to get the attribute.
- * @param constant_name The name of the attribute to get.
- * @param def The value to return if the attribute doesn't exist or is not set.
+ * @param 	instance The instance of the object to get the attribute.
+ * @param 	constant_name The name of the attribute to get.
+ * @param 	def The value to return if the attribute doesn't exist or is not set.
  *
- * @return The value attribute as long.
+ * @return 	The value attribute as long.
  */
 long remmina_plugin_python_get_attribute_long(PyObject* instance, const gchar* attr_name, long def);
 

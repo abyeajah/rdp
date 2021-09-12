@@ -32,21 +32,31 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_pref.h
+ *
+ * @brief	Contains the specialisation of RemminaPluginFile plugins in Python.
+ */
+
 #pragma once
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
 /**
- *
+ * Initializes the Python plugin specialisation for preferences plugins.
  */
 void remmina_plugin_python_pref_init(void);
 
 /**
- * @brief
+ * @brief	Creates a new instance of the RemminaPluginPref, initializes its members and references the wrapper
+ * 			functions.
+ * @param 	instance The instance of the Python plugin.
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
  */
-GtkWidget* remmina_plugin_python_pref_get_pref_body_wrapper(RemminaPrefPlugin* instance);
-
 RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyPlugin* instance);
 
 G_END_DECLS
-

@@ -47,16 +47,9 @@
 G_BEGIN_DECLS
 
 /**
- * Initializes the implementation of the entry Python plugin.
+ * Initializes the Python plugin specialisation for entr plugins.
  */
 void remmina_plugin_python_entry_init(void);
-
-/**
- * @brief 	Wraps the entry function of the Python plugin.
- *
- * @param 	instance The instance to the Remmina entry plugin instance
- */
-void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance);
 
 /**
  * @brief	Creates a new instance of the RemminaPluginEntry, initializes its members and references the wrapper

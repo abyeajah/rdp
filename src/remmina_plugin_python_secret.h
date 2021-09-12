@@ -32,26 +32,37 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_entry.h
+ *
+ * @brief	Contains the specialisation of RemminaPluginEntry plugins in Python.
+ */
+
 #pragma once
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// I N L U C E S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "remmina/plugin.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
 /**
- *
+ * Initializes the Python plugin specialisation for secret plugins.
  */
 void remmina_plugin_python_secret_init(void);
 
-gboolean remmina_plugin_python_secret_init_wrapper(RemminaSecretPlugin* instance);
-gboolean remmina_plugin_python_secret_is_service_available_wrapper(RemminaSecretPlugin* instance);
-void
-remmina_plugin_python_secret_store_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key, const gchar* password);
-gchar*
-remmina_plugin_python_secret_get_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key);
-void
-remmina_plugin_python_secret_delete_password_wrapper(RemminaSecretPlugin* instance, RemminaFile* file, const gchar* key);
-
+/**
+ * @brief	Creates a new instance of the RemminaPluginSecret, initializes its members and references the wrapper
+ * 			functions.
+ * @param 	instance The instance of the Python plugin.
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
+ */
 RemminaPlugin* remmina_plugin_python_create_secret_plugin(PyPlugin* instance);
 
 G_END_DECLS

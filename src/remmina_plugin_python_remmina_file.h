@@ -32,6 +32,26 @@
  *
  */
 
+
+/**
+ * @file 	remmina_plugin_python_protocol.h
+ *
+ * @brief	Contains the implementation of the Python type remmina.RemminaFile.
+ */
+
 #pragma once
 
-PyObject* remmina_plugin_python_remmina_file_to_python(RemminaFile* file);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Wrapper for a Python object that contains a pointer to an instance of RemminaFile.
+ */
+typedef struct { PyObject_HEAD RemminaFile* file; } PyRemminaFile;
+
+
+/**
+ * Converts the instance of RemminaFile to a Python object that can be passed to the Python engine.
+ */
+PyRemminaFile* remmina_plugin_python_remmina_file_to_python(RemminaFile* file);

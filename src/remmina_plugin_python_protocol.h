@@ -32,81 +32,49 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_protocol.h
+ *
+ * @brief	Contains the specialisation of RemminaPluginFile plugins in Python.
+ */
+
 #pragma once
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// I N C L U D E S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "remmina/plugin.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
 /**
- *
+ * Initializes the Python plugin specialisation for protocol plugins.
  */
 void remmina_plugin_python_protocol_init(void);
 
 /**
- * @brief Handles the initialization of the Python plugin.
- * @details This function prepares the plugin structure and calls the init method of the
- * plugin Python class.
+ * @brief	Creates a new instance of the RemminaPluginProtocol, initializes its members and references the wrapper
+ * 			functions.
  *
- * @param   gp  The protocol widget used by the plugin.
- */
-void remmina_protocol_init_wrapper(RemminaProtocolWidget* gp);
-
-/**
- * @brief
- * @details
+ * @param 	instance The instance of the Python plugin.
  *
- * @param   gp  The protocol widget used by the plugin.
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
  */
-gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget* gp);
-
-/**
- * @brief
- * @details
- *
- * @param   gp  The protocol widget used by the plugin.
- */
-gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget* gp);
-
-/**
- * @brief
- * @details
- *
- * @param   gp  The protocol widget used by the plugin.
- */
-gboolean remmina_protocol_query_feature_wrapper(RemminaProtocolWidget* gp, const RemminaProtocolFeature* feature);
-
-/**
- * @brief
- * @details
- *
- * @param   gp  The protocol widget used by the plugin.
- */
-void remmina_protocol_call_feature_wrapper(RemminaProtocolWidget* gp, const RemminaProtocolFeature* feature);
-
-/**
- * @brief
- * @details
- *
- * @param   gp  The protocol widget used by the plugin.
- */
-void remmina_protocol_send_keytrokes_wrapper(RemminaProtocolWidget* gp, const guint keystrokes[], const gint keylen);
-
-/**
- * @brief
- * @details
- *
- * @param   gp  The protocol widget used by the plugin.
- */
-gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolWidget* gp, RemminaPluginScreenshotData* rpsd);
-
 RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin);
 
 /**
- * @brief Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
+ * @brief 	Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
  *
- * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information is explicitly passed. To bridge
- * that, this function can be used to retrieve the very plugin instance owning the given RemminaProtocolWidget.
+ * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information
+ * 			is explicitly passed. To bridge that, this function can be used to retrieve the very plugin instance owning
+ * 			the given RemminaProtocolWidget.
+ *
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
  */
 PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp);
 

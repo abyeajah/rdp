@@ -37,12 +37,6 @@
 #include "remmina_plugin_python_common.h"
 #include "remmina_plugin_python_remmina_file.h"
 
-typedef struct
-{
-	PyObject_HEAD
-	RemminaFile* file;
-} PyRemminaFile;
-
 static PyObject* file_get_path(PyRemminaFile* self, PyObject* args);
 static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds);
 static PyObject* file_get_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds);
@@ -67,7 +61,7 @@ static PyMethodDef python_remmina_file_type_methods[] = {
  */
 static PyTypeObject python_remmina_file_type = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	.tp_name = "remmina.RemminaFileType",
+	.tp_name = "remmina.RemminaFile",
 	.tp_doc = "",
 	.tp_basicsize = sizeof(PyRemminaFile),
 	.tp_itemsize = 0,
@@ -76,13 +70,13 @@ static PyTypeObject python_remmina_file_type = {
 	.tp_dealloc = file_dealloc
 };
 
-PyObject* remmina_plugin_python_remmina_file_to_python(RemminaFile* file)
+PyRemminaFile* remmina_plugin_python_remmina_file_to_python(RemminaFile* file)
 {
 	TRACE_CALL(__func__);
 	PyRemminaFile* result = PyObject_New(PyRemminaFile, &python_remmina_file_type);
 	result->file = file;
 	Py_INCREF(result);
-	return (PyObject*)result;
+	return result;
 }
 
 static PyObject* file_get_path(PyRemminaFile* self, PyObject* args)

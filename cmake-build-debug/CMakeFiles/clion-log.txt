@@ -1,0 +1,70 @@
+/snap/clion/163/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DWITH_PYTHONLIBS=On -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/toolsdevler/git/Remmina
+-- Checking for module 'libpcre2-8-0'
+--   No package 'libpcre2-8-0' found
+-- Found pcre2 headers at /usr/include
+-- Found pcre2 libraries at /usr/lib/x86_64-linux-gnu/libpcre2-8.so
+-- Remmina version: 1.4.20
+-- Git Revision: b240e4aa4
+-- Folders won't be removed during uninstall target
+-- Found Pango: /usr/lib/x86_64-linux-gnu/libpango-1.0.so (found version "1.44.7") 
+-- Found Pango: /usr/lib/x86_64-linux-gnu/libpango-1.0.so (found version "1.44.7") 
+-- Wayland library found.
+-- Finding suggested package GCRYPT.
+--   Disable this using "-DWITH_GCRYPT=OFF".
+-- sodium_LIBRARY_RELEASE: /usr/lib/x86_64-linux-gnu/libsodium.so
+-- sodium_INCLUDE_DIR: /usr/include
+-- sodium_LIBRARY_DEBUG: /usr/lib/x86_64-linux-gnu/libsodium.so
+-- Enabling version check connecting to remmina.org
+-- Enabling man pages.
+-- Finding suggested package Avahi.
+--   Disable this using "-DWITH_AVAHI=OFF".
+-- Avahi-Libs found: /usr/lib/x86_64-linux-gnu/libavahi-common.so;/usr/lib/x86_64-linux-gnu/libavahi-client.so;/usr/lib/x86_64-linux-gnu/libavahi-ui-gtk3.so
+-- Avahi-Include-Dirs found: /usr/include/avahi-common;/usr/include/avahi-client;/usr/include/avahi-ui
+-- AVAHI_INCLUDE_DIRS=/usr/include/avahi-common;/usr/include/avahi-client;/usr/include/avahi-ui
+-- AVAHI_LIBRARIES=/usr/lib/x86_64-linux-gnu/libavahi-common.so;/usr/lib/x86_64-linux-gnu/libavahi-client.so;/usr/lib/x86_64-linux-gnu/libavahi-ui-gtk3.so
+-- Icon cache will be generated
+-- Theme icon cache will be rebuilt
+-- Desktop MIME types cache database enabled
+-- Python plugins support enabled
+-- Finding suggested package PythonLibs.
+--   Disable this using "-DWITH_PYTHONLIBS=OFF".
+-- Python libs found, Python support enabled
+-- Linux detected, building with Intl
+-- Finding suggested package LIBSSH.
+--   Disable this using "-DWITH_LIBSSH=OFF".
+-- Finding suggested package VTE.
+--   Disable this using "-DWITH_VTE=OFF".
+-- Sodium found
+-- Sodium include dirs /usr/include
+-- Checking for module 'ayatana-appindicator3-0.1'
+--   No package 'ayatana-appindicator3-0.1' found
+-- AppIndicator library dirs /usr/lib/x86_64-linux-gnu/libappindicator3.so
+-- AppIndicator include dirs /usr/include/libappindicator3-0.1
+-- Checking for module 'libpcre2-8-0'
+--   No package 'libpcre2-8-0' found
+-- Found pcre2 headers at /usr/include
+-- Found pcre2 libraries at /usr/lib/x86_64-linux-gnu/libpcre2-8.so
+-- Kiosk desktop session files won't be installed
+-- Finding suggested package LIBSSH.
+--   Disable this using "-DWITH_LIBSSH=OFF".
+-- Checking for module 'freerdp3>=3.0.0'
+--   No package 'freerdp3' found
+-- Could NOT find FREERDP3 (missing: FREERDP3_LIBRARY FREERDP3_INCLUDE_DIR) 
+-- Finding suggested package Cups.
+--   Disable this using "-DWITH_CUPS=OFF".
+-- Finding suggested package LIBVNCSERVER.
+--   Disable this using "-DWITH_LIBVNCSERVER=OFF".
+-- Disabling GVNC plugin.
+-- Finding suggested package Spice.
+--   Disable this using "-DWITH_SPICE=OFF".
+-- Spice-Libs: /usr/lib/x86_64-linux-gnu/libspice-client-gtk-3.0.so;/usr/lib/x86_64-linux-gnu/libspice-client-glib-2.0.so
+-- Spice-Include-Dirs: /usr/include/spice-client-gtk-3.0;/usr/include/spice-client-glib-2.0;/usr/include/spice-1
+-- Enabling WWW plugin.
+-- WWW plugin dependencies found
+-- Finding suggested package Libsecret.
+--   Disable this using "-DWITH_LIBSECRET=OFF".
+-- Finding suggested package Gettext.
+--   Disable this using "-DWITH_GETTEXT=OFF".
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/toolsdevler/git/Remmina/cmake-build-debug

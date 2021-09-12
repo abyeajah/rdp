@@ -48,7 +48,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * An null terminated array of commands that are executed after the initialisation of the Python engine. Every entry
+ * An null terminated array of commands that are executed after the initialization of the Python engine. Every entry
  * represents a line of Python code.
  */
 static const gchar* python_init_commands[] = {

@@ -32,9 +32,24 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_remmina.h
+ *
+ * @brief	Contains the implementation of the Python module 'remmina', provided to interface with the application from
+ * 			the Python plugin source.
+ */
+
 #pragma once
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// I N C L U D E S
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "remmina_plugin_python_protocol_widget.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
@@ -44,26 +59,29 @@ G_BEGIN_DECLS
 void remmina_plugin_python_module_init(void);
 
 /**
- * Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
+ * @brief 	Returns a pointer to the Python instance, mapped to the RemminaProtocolWidget or null if not found.
  *
- * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information is explicitly passed. To bridge
- * that, this function can be used to retrieve the very plugin instance owning the given RemminaProtocolWidget.
+ * @param 	gp The widget that is owned by the plugin that should be found.
+ *
+ * @details Remmina expects this callback function to be part of one plugin, which is the reason no instance information
+ * 			is explicitly passed. To bridge that, this function can be used to retrieve the very plugin instance owning
+ * 			the given RemminaProtocolWidget.
  */
 PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp);
 
 /**
- * Converts the PyObject to RemminaProtocolSetting.
+ * @brief 	Converts the PyObject to RemminaProtocolSetting.
  *
- * @param dest A target for the converted value.
- * @param setting The source value to convert.
+ * @param 	dest A target for the converted value.
+ * @param 	setting The source value to convert.
  */
 void remmina_plugin_python_to_protocol_setting(RemminaProtocolSetting* dest, PyObject* setting);
 
 /**
- * Converts the PyObject to RemminaProtocolFeature.
+ * @brief 	Converts the PyObject to RemminaProtocolFeature.
  *
- * @param dest A target for the converted value.
- * @param setting The source value to convert.
+ * @param 	dest A target for the converted value.
+ * @param 	setting The source value to convert.
  */
 void remmina_plugin_python_to_protocol_feature(RemminaProtocolFeature* dest, PyObject* feature);
 

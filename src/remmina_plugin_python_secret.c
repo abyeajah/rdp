@@ -38,7 +38,7 @@ remmina_plugin_python_secret_store_password_wrapper(RemminaSecretPlugin* instanc
 {
 	TRACE_CALL(__func__);
 	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
-	CallPythonMethod(plugin->instance, "store_password", "Oss", remmina_plugin_python_remmina_file_to_python(file), key, password);
+	CallPythonMethod(plugin->instance, "store_password", "Oss", (PyObject*)remmina_plugin_python_remmina_file_to_python(file), key, password);
 }
 
 gchar*
@@ -46,7 +46,7 @@ remmina_plugin_python_secret_get_password_wrapper(RemminaSecretPlugin* instance,
 {
 	TRACE_CALL(__func__);
 	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "get_password", "Os", remmina_plugin_python_remmina_file_to_python(file), key);
+	PyObject* result = CallPythonMethod(plugin->instance, "get_password", "Os", (PyObject*)remmina_plugin_python_remmina_file_to_python(file), key);
 	Py_ssize_t len = PyUnicode_GetLength(result);
 	if (len == 0)
 	{
@@ -63,7 +63,7 @@ remmina_plugin_python_secret_delete_password_wrapper(RemminaSecretPlugin* instan
 {
 	TRACE_CALL(__func__);
 	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
-	CallPythonMethod(plugin->instance, "delete_password", "Os", remmina_plugin_python_remmina_file_to_python(file), key);
+	CallPythonMethod(plugin->instance, "delete_password", "Os", (PyObject*)remmina_plugin_python_remmina_file_to_python(file), key);
 }
 
 RemminaPlugin* remmina_plugin_python_create_secret_plugin(PyPlugin* plugin)

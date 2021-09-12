@@ -47,48 +47,15 @@
 G_BEGIN_DECLS
 
 /**
- * Initializes
+ * Initializes the Python plugin specialisation for file plugins.
  */
 void remmina_plugin_python_file_init(void);
 
 /**
- * @brief
- * @param 	instance
- * @param 	from_file
- * @return
- */
-gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
-
-/**
- * @brief
- * @param instance
- * @param from_file
- * @return
- */
-RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
-
-/**
- * @brief
- * @param instance
- * @param file
- * @return
- */
-gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file);
-
-/**
- * @brief
- * @param instance
- * @param file
- * @param to_file
- * @return
- */
-gboolean
-remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file, const gchar* to_file);
-
-/**
- * @brief
- * @param instance
- * @return
+ * @brief	Creates a new instance of the RemminaPluginFile, initializes its members and references the wrapper
+ * 			functions.
+ * @param 	instance The instance of the Python plugin.
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
  */
 RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* instance);
 

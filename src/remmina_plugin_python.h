@@ -35,7 +35,7 @@
 /**
  * @file 	remmina_plugin_python.h
  *
- * @brief	Declares the interface between the Python plugin implementation and Remmina covering the initialisation of
+ * @brief	Declares the interface between the Python plugin implementation and Remmina covering the initialization of
  * 			the implementation and the load function, that allows Remmina to load plugins into the application.
  *
  * @details When Remmina discovers Python scripts in the plugin root folder the plugin manager passes the path to the

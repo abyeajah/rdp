@@ -196,11 +196,6 @@ static int python_protocol_widget_init(PyRemminaProtocolWidget* self, PyObject* 
 	return 0;
 }
 
-static void generic_dealloc(PyObject* self)
-{
-	PyObject_Del(self);
-}
-
 static PyObject* python_protocol_feature_new(PyTypeObject* type, PyObject* kws, PyObject* args)
 {
 	PyRemminaProtocolWidget* self;
@@ -227,13 +222,6 @@ static PyTypeObject python_protocol_widget_type = {
 	.tp_init = python_protocol_feature_init,
 	.tp_methods = python_protocol_widget_type_methods
 };
-
-typedef struct
-{
-	PyObject_HEAD
-	PyDictObject* settings;
-	PyDictObject* spsettings;
-} PyRemminaFile;
 
 #define SELF_CHECK() if (!self) { \
         g_printerr("[%s:%d]: self is null!\n", __FILE__, __LINE__); \
@@ -397,7 +385,7 @@ static PyObject* protocol_widget_get_file(PyRemminaProtocolWidget* self, PyObjec
 	SELF_CHECK();
 
 	RemminaFile* file = remmina_protocol_widget_get_file(self->gp);
-	return remmina_plugin_python_remmina_file_to_python(file);
+	return (PyObject*)remmina_plugin_python_remmina_file_to_python(file);
 }
 
 static PyObject* protocol_widget_emit_signal(PyRemminaProtocolWidget* self, PyObject* var_signal)
