@@ -44,6 +44,7 @@ class HelloPlugin:
             self.btn.show()
 
         viewport.foreach(foreach_child)
+        remmina.protocol_plugin_signal_connection_opened(gp);
         print("Connected!")
 
         remmina.log_print("[%s]: Plugin open connection\n" % self.name)
@@ -57,9 +58,18 @@ class HelloPlugin:
 
         return True
 
-    def close_connection(self, viewport):
+    def close_connection(self, gp):
         print("close_connection!")
         remmina.log_print("[%s]: Plugin close connection\n" % self.name)
+        remmina.protocol_plugin_signal_connection_closed(gp);
+        return False
+
+    def map_event(self, gp):
+        print("[PyVNC.map_event]: Called!")
+        return True
+
+    def unmap_event(self, gp):
+        print("[PyVNC.unmap_event]: Called!")
         return True
 
     def query_feature(self):

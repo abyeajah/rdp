@@ -67,7 +67,7 @@ class Plugin:
         
     def init(self, gp):
         print("[PyVNC.init]: Called!")
-        pass
+        return True
 
     def open_connection(self, gp):
         print("[PyVNC.open_connection]: Called!")
@@ -80,6 +80,14 @@ class Plugin:
     def query_feature(self, gp):
         print("[PyVNC.query_feature]: Called!")
         pass
+
+    def map_event(self, gp):
+        print("[PyVNC.map_event]: Called!")
+        return True
+
+    def unmap_event(self, gp):
+        print("[PyVNC.unmap_event]: Called!")
+        return True
 
     def call_feature(self, gp):
         print("[PyVNC.call_feature]: Called!")
