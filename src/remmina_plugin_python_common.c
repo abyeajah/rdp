@@ -144,3 +144,22 @@ void* remmina_plugin_python_malloc(int bytes)
 
 	return result;
 }
+
+gchar* remmina_plugin_python_copy_string_from_python(PyObject* string, Py_ssize_t len)
+{
+	gchar* result = NULL;
+	if (len <= 0 || string == NULL) {
+		return NULL;
+	}
+
+	const gchar* py_label = PyUnicode_AsUTF8(string);
+	if (py_label) {
+		const int label_size = sizeof(gchar) * (len + 1);
+		result = (gchar*)remmina_plugin_python_malloc(label_size);
+		result[len] = '\0';
+		memcpy(result, PyUnicode_AsUTF8(string), len);
+	}
+
+	return result;
+}
+

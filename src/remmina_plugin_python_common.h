@@ -185,4 +185,12 @@ gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* 
  */
 void* remmina_plugin_python_malloc(int bytes);
 
+/**
+ * Copies a string from a Python object to a new point in memory.
+ * @param string 	The python object, containing the string to copy.
+ * @param len		The length of the string to copy.
+ * @return A gchar pointer to the new copy of the string.
+ */
+gchar* remmina_plugin_python_copy_string_from_python(PyObject* string, Py_ssize_t len);
+
 G_END_DECLS

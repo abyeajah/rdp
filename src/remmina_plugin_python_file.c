@@ -43,30 +43,55 @@ static PyPlugin* get_plugin(RemminaToolPlugin* instance)
 
 gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file)
 {
+	PyObject* result = NULL;
+
 	PyPlugin* plugin = get_plugin(instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "import_test_func", "s", from_file);
+	if (plugin)
+	{
+		result = CallPythonMethod(plugin->instance, "import_test_func", "s", from_file);
+	}
+
 	return result == Py_None || result != Py_False;
 }
 
 RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file)
 {
+	PyObject* result = NULL;
+
 	PyPlugin* plugin = get_plugin(instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "import_func", "s", from_file);
+	if (plugin)
+	{
+		result = CallPythonMethod(plugin->instance, "import_func", "s", from_file);
+	}
+
 	return result == Py_None || result != Py_False;
 }
 
 gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file)
 {
+	PyObject* result = NULL;
+
 	PyPlugin* plugin = get_plugin(instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "export_test_func", "O", remmina_plugin_python_remmina_file_to_python(file));
+	if (plugin)
+	{
+		result = CallPythonMethod(plugin
+			->instance, "export_test_func", "O", remmina_plugin_python_remmina_file_to_python(file));
+	}
+
 	return result == Py_None || result != Py_False;
 }
 
 gboolean
 remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file, const gchar* to_file)
 {
+	PyObject* result = NULL;
+
 	PyPlugin* plugin = get_plugin(instance);
-	PyObject* result = CallPythonMethod(plugin->instance, "export_func", "s", to_file);
+	if (plugin)
+	{
+		result = CallPythonMethod(plugin->instance, "export_func", "s", to_file);
+	}
+
 	return result == Py_None || result != Py_False;
 }
 
@@ -94,7 +119,7 @@ RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* plugin)
 	remmina_plugin->export_func = remmina_plugin_python_file_export_func_wrapper;
 
 	plugin->file_plugin = remmina_plugin;
-	plugin->generic_plugin = remmina_plugin;
+	plugin->generic_plugin = (RemminaPlugin*)remmina_plugin;
 
 	g_ptr_array_add(plugin_map, plugin);
 
