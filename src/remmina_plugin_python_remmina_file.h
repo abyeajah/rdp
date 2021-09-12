@@ -48,8 +48,11 @@
 /**
  * Wrapper for a Python object that contains a pointer to an instance of RemminaFile.
  */
-typedef struct { PyObject_HEAD RemminaFile* file; } PyRemminaFile;
-
+typedef struct
+{
+	PyObject_HEAD
+	RemminaFile* file;
+} PyRemminaFile;
 
 /**
  * Converts the instance of RemminaFile to a Python object that can be passed to the Python engine.

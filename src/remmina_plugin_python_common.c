@@ -82,18 +82,21 @@ static const int REASONABLE_LIMIT_FOR_MALLOC = 1024 * 1024;
 PyObject* remmina_plugin_python_last_result(void)
 {
 	TRACE_CALL(__func__);
+
 	return __last_result;
 }
 
 PyObject* remmina_plugin_python_last_result_set(PyObject* last_result)
 {
 	TRACE_CALL(__func__);
+
 	return __last_result = last_result;
 }
 
 gboolean remmina_plugin_python_check_error(void)
 {
 	TRACE_CALL(__func__);
+
 	if (PyErr_Occurred())
 	{
 		PyErr_Print();
@@ -105,6 +108,7 @@ gboolean remmina_plugin_python_check_error(void)
 void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* method)
 {
 	TRACE_CALL(__func__);
+
 	assert(instance);
 	assert(method);
 	g_print(LOG_METHOD_CALL_FMT, PyObject_Hash(instance), instance->ob_type->tp_name, method,
@@ -182,6 +186,8 @@ gchar* remmina_plugin_python_copy_string_from_python(PyObject* string, Py_ssize_
 
 PyPlugin* remmina_plugin_python_get_plugin(GPtrArray* plugin_map, RemminaPlugin* instance)
 {
+	TRACE_CALL(__func__);
+
 	assert(plugin_map);
 	assert(instance);
 

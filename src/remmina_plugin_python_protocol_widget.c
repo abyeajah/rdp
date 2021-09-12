@@ -462,7 +462,8 @@ static PyObject* protocol_widget_start_reverse_tunnel(PyRemminaProtocolWidget* s
 static gboolean xport_tunnel_init(RemminaProtocolWidget* gp, gint remotedisplay, const gchar* server, gint port)
 {
 	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
-	PyObject* result = PyObject_CallMethod(plugin->instance, "xport_tunnel_init", "Oisi", gp, remotedisplay, server, port);
+	PyObject* result = PyObject_CallMethod(plugin
+		->instance, "xport_tunnel_init", "Oisi", gp, remotedisplay, server, port);
 	return PyObject_IsTrue(result);
 }
 
@@ -542,7 +543,7 @@ static PyObject* protocol_widget_panel_auth(PyRemminaProtocolWidget* self, PyObj
 	SELF_CHECK();
 
 	gint pflags = 0;
-	gchar* title, *default_username, *default_password, *default_domain, *password_prompt;
+	gchar* title, * default_username, * default_password, * default_domain, * password_prompt;
 
 	if (PyArg_ParseTuple(args, "isssss", &pflags, &title, &default_username, &default_password, &default_domain, &password_prompt))
 	{
@@ -572,7 +573,7 @@ static PyObject* protocol_widget_panel_new_certificate(PyRemminaProtocolWidget* 
 {
 	TRACE_CALL(__func__);
 	SELF_CHECK();
-	gchar* subject, *issuer, *fingerprint;
+	gchar* subject, * issuer, * fingerprint;
 
 	if (PyArg_ParseTuple(args, "sss", &subject, &issuer, &fingerprint))
 	{
@@ -590,7 +591,7 @@ static PyObject* protocol_widget_panel_changed_certificate(PyRemminaProtocolWidg
 {
 	TRACE_CALL(__func__);
 	SELF_CHECK();
-	gchar* subject, *issuer, *new_fingerprint, *old_fingerprint;
+	gchar* subject, * issuer, * new_fingerprint, * old_fingerprint;
 
 	if (PyArg_ParseTuple(args, "sss", &subject, &issuer, &new_fingerprint, &old_fingerprint))
 	{

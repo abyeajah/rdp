@@ -87,7 +87,6 @@ gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget* gp)
 	}
 }
 
-
 gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget* gp)
 {
 	TRACE_CALL(__func__);
@@ -192,7 +191,8 @@ RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin)
 	len = PyList_Size(list);
 	if (len)
 	{
-		RemminaProtocolSetting* advanced_settings = (RemminaProtocolSetting*)malloc(sizeof(RemminaProtocolSetting) * (len + 1));
+		RemminaProtocolSetting* advanced_settings = (RemminaProtocolSetting*)malloc(
+			sizeof(RemminaProtocolSetting) * (len + 1));
 		memset(&advanced_settings[len], 0, sizeof(RemminaProtocolSetting));
 
 		for (Py_ssize_t i = 0; i < len; ++i)

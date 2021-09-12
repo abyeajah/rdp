@@ -111,7 +111,11 @@ extern const gchar* ATTR_INIT_ORDER;
  * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
  * 			native plugins.
  */
-typedef struct { PyObject_HEAD RemminaProtocolWidget* gp; } PyRemminaProtocolWidget;
+typedef struct
+{
+	PyObject_HEAD
+	RemminaProtocolWidget* gp;
+} PyRemminaProtocolWidget;
 
 /**
  * @brief 	Maps an instance of a Python plugin to a Remmina one.
