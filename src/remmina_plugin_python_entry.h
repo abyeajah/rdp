@@ -32,24 +32,37 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_entry.h
+ *
+ * @brief	Contains the specialisation of RemminaPluginEntry plugins in Python.
+ */
+
 #pragma once
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
 /**
- *
+ * Initializes the implementation of the entry Python plugin.
  */
 void remmina_plugin_python_entry_init(void);
 
 /**
- * @brief
+ * @brief 	Wraps the entry function of the Python plugin.
+ *
+ * @param 	instance The instance to the Remmina entry plugin instance
  */
 void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance);
 
 /**
- *
- * @param instance
- * @return
+ * @brief	Creates a new instance of the RemminaPluginEntry, initializes its members and references the wrapper
+ * 			functions.
+ * @param 	instance The instance of the Python plugin.
+ * @return	Returns a new instance of the RemminaPlugin (must be freed!).
  */
 RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* instance);
 

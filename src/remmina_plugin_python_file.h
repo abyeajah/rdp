@@ -32,20 +32,64 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_file.h
+ *
+ * @brief	Contains the specialisation of RemminaPluginFile plugins in Python.
+ */
+
 #pragma once
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// A P I
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 G_BEGIN_DECLS
 
 /**
- *
+ * Initializes
  */
 void remmina_plugin_python_file_init(void);
 
+/**
+ * @brief
+ * @param 	instance
+ * @param 	from_file
+ * @return
+ */
 gboolean remmina_plugin_python_file_import_test_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
+
+/**
+ * @brief
+ * @param instance
+ * @param from_file
+ * @return
+ */
 RemminaFile* remmina_plugin_python_file_import_func_wrapper(RemminaFilePlugin* instance, const gchar* from_file);
+
+/**
+ * @brief
+ * @param instance
+ * @param file
+ * @return
+ */
 gboolean remmina_plugin_python_file_export_test_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file);
+
+/**
+ * @brief
+ * @param instance
+ * @param file
+ * @param to_file
+ * @return
+ */
 gboolean
 remmina_plugin_python_file_export_func_wrapper(RemminaFilePlugin* instance, RemminaFile* file, const gchar* to_file);
+
+/**
+ * @brief
+ * @param instance
+ * @return
+ */
 RemminaPlugin* remmina_plugin_python_create_file_plugin(PyPlugin* instance);
 
 G_END_DECLS

@@ -55,8 +55,8 @@ static void file_dealloc(PyObject* self)
 
 static PyMethodDef python_remmina_file_type_methods[] = {
 	{ "get_path", (PyCFunction)file_get_path, METH_NOARGS, "" },
-	{ "set_setting", (PyCFunctionWithKeywords)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Set file setting" },
-	{ "get_setting", (PyCFunctionWithKeywords)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Get file setting" },
+	{ "set_setting", (PyCFunction)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Set file setting" },
+	{ "get_setting", (PyCFunction)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Get file setting" },
 	{ "get_secret", (PyCFunction)file_get_secret, METH_VARARGS, "Get secret file setting" },
 	{ "unsave_passwords", (PyCFunction)file_unsave_passwords },
 	{ NULL }
@@ -82,7 +82,7 @@ PyObject* remmina_plugin_python_remmina_file_to_python(RemminaFile* file)
 	PyRemminaFile* result = PyObject_New(PyRemminaFile, &python_remmina_file_type);
 	result->file = file;
 	Py_INCREF(result);
-	return result;
+	return (PyObject*)result;
 }
 
 static PyObject* file_get_path(PyRemminaFile* self, PyObject* args)
@@ -92,7 +92,7 @@ static PyObject* file_get_path(PyRemminaFile* self, PyObject* args)
 
 static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds)
 {
-	static const gchar* keyword_list[] = { "key", "value" };
+	static gchar* keyword_list[] = { "key", "value" };
 	gchar* key;
 	PyObject* value;
 
@@ -104,7 +104,7 @@ static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject*
 		}
 		else if (PyLong_Check(value))
 		{
-			remmina_file_set_int(self->file, key, PyUnicode_AsUTF8(value));
+			remmina_file_set_int(self->file, key, PyLong_AsLong(value));
 		}
 		else
 		{
@@ -122,7 +122,7 @@ static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject*
 
 static PyObject* file_get_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds)
 {
-	static const gchar* keyword_list[] = { "key", "default" };
+	static gchar* keyword_list[] = { "key", "default" };
 	gchar* key;
 	PyObject* def;
 

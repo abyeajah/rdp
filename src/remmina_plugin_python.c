@@ -32,23 +32,6 @@
  *
  */
 
-/**
- * @file remmina_plugin_python.c
- * @brief Remmina Python plugin loader.
- * @author Mathias Winterhalter
- * @date 14.10.2020
- *
- * When Remmina discovers Python scripts in the plugin root folder the plugin manager
- * passes the path to the Python plugin loader. There it gets executed and the plugin
- * classes get mapped to "real" Remmina plugin instances.
- *
- * For the communication between Remmina and Python the python module called 'remmina'
- * is initialized and loaded into the environment of the plugin script
- * (@see remmina_plugin_python_module.c).
- *
- * @see http://www.remmina.org/wp for more information.
- */
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // I N C L U D E S
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,6 +47,10 @@
 // D E C L A R A T I O N S
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * An null terminated array of commands that are executed after the initialisation of the Python engine. Every entry
+ * represents a line of Python code.
+ */
 static const gchar* python_init_commands[] = {
 	"import sys",
 	"sys.path.append('" REMMINA_RUNTIME_PLUGINDIR "')",
@@ -80,7 +67,7 @@ static const gchar* ERR_LOAD_PLUGIN = "[%s:%d]: Failed to load python plugin fil
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Extracts the filename without extension from a path.
+ * @brief 	Extracts the filename without extension from a path.
  *
  * @param   in  The string to extract the filename from
  * @param   out The resulting filename without extension (must point to allocated memory).
@@ -89,6 +76,8 @@ static const gchar* ERR_LOAD_PLUGIN = "[%s:%d]: Failed to load python plugin fil
  */
 static int basename_no_ext(const gchar* in, gchar** out)
 {
+	TRACE_CALL(__func__);
+
 	const gchar* base = strrchr(in, '/');
 	if (base)
 	{

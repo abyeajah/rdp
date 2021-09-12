@@ -88,8 +88,7 @@ static PyObject* remmina_pref_get_sshtunnel_port_wrapper(PyObject* self, PyObjec
 static PyObject* remmina_pref_get_ssh_loglevel_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_pref_get_ssh_parseconfig_wrapper(PyObject* self, PyObject* plugin);
 static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
-static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
-static PyObject* remmina_log_printf_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
+static PyObject* remmina_plugin_python_log_print_wrapper(PyObject* self, PyObject *arg);
 static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
 static PyObject* rcw_open_from_file_full_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
 static PyObject* remmina_public_get_server_port_wrapper(PyObject* self, PyObject *args, PyObject *kwargs);
@@ -114,7 +113,7 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	/**
 	 * Prints a string into the Remmina log infrastructure.
 	 */
-	{ "log_print", remmina_plugin_python_log_printf_wrapper, METH_VARARGS, NULL },
+	{ "log_print", remmina_plugin_python_log_print_wrapper, METH_VARARGS, NULL },
 
 	/**
 	 * Shows a GTK+ dialog.
@@ -135,17 +134,17 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	/**
 	 * Calls remmina_file_new and returns its result.
 	 */
-	{ "file_new", remmina_file_new_wrapper, METH_VARARGS, NULL },
+	{ "file_new", (PyCFunction)remmina_file_new_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_pref_set_value and returns its result.
 	 */
-	{ "pref_set_value", remmina_pref_set_value_wrapper, METH_VARARGS, NULL },
+	{ "pref_set_value", (PyCFunction)remmina_pref_set_value_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_pref_get_value and returns its result.
 	 */
-	{ "pref_get_value", remmina_pref_get_value_wrapper, METH_VARARGS, NULL },
+	{ "pref_get_value", (PyCFunction)remmina_pref_get_value_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_pref_get_scale_quality and returns its result.
@@ -170,22 +169,22 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	/**
 	 * Calls remmina_pref_keymap_get_keyval and returns its result.
 	 */
-	{ "pref_keymap_get_keyval", remmina_pref_keymap_get_keyval_wrapper, METH_VARARGS, NULL },
+	{ "pref_keymap_get_keyval", (PyCFunction)remmina_pref_keymap_get_keyval_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_widget_pool_register and returns its result.
 	 */
-	{ "widget_pool_register", remmina_widget_pool_register_wrapper, METH_VARARGS, NULL },
+	{ "widget_pool_register", (PyCFunction)remmina_widget_pool_register_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls rcw_open_from_file_full and returns its result.
 	 */
-	{ "rcw_open_from_file_full", rcw_open_from_file_full_wrapper, METH_VARARGS, NULL },
+	{ "rcw_open_from_file_full", (PyCFunction)rcw_open_from_file_full_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_public_get_server_port and returns its result.
 	 */
-	{ "public_get_server_port", remmina_public_get_server_port_wrapper, METH_VARARGS, NULL },
+	{ "public_get_server_port", (PyCFunction)remmina_public_get_server_port_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_masterthread_exec_is_main_thread and returns its result.
@@ -201,13 +200,13 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	 * Calls remmina_protocol_widget_get_profile_remote_width and returns its result.
 	 */
 	{ "protocol_widget_get_profile_remote_width",
-	  remmina_protocol_widget_get_profile_remote_width_wrapper, METH_VARARGS, NULL },
+	  (PyCFunction)remmina_protocol_widget_get_profile_remote_width_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_protocol_widget_get_profile_remote_height and returns its result.
 	 */
 	{ "remmina_protocol_widget_get_profile_remote_height",
-	  remmina_protocol_widget_get_profile_remote_height_wrapper, METH_VARARGS, NULL },
+	  (PyCFunction)remmina_protocol_widget_get_profile_remote_height_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/* Sentinel */
 	{ NULL }
@@ -645,7 +644,7 @@ static PyObject* remmina_pref_set_value_wrapper(PyObject* self, PyObject *args, 
 {
 	TRACE_CALL(__func__);
 	static char* kwlist[] = { "key", "value", NULL };
-	gchar* key, value;
+	gchar* key, *value;
 
 	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss", kwlist, &key, &value))
 	{
@@ -740,15 +739,22 @@ static PyObject* remmina_pref_keymap_get_keyval_wrapper(PyObject* self, PyObject
 	return result;
 }
 
-static PyObject* remmina_log_print_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
+static PyObject* remmina_plugin_python_log_print_wrapper(PyObject* self, PyObject *arg)
 {
 	TRACE_CALL(__func__);
-	static char kwlist[] = { "text", NULL };
-	gchar* text;
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "s", &text) && text)
+	Py_ssize_t len = PyUnicode_GetLength(arg);
+	if (len == 0)
 	{
-		remmina_log_print(text);
+		remmina_log_print("");
+	}
+	else
+	{
+		const gchar* text = remmina_plugin_python_copy_string_from_python(arg, len);
+		if (text)
+		{
+			remmina_log_print(text);
+		}
 	}
 
 	return Py_None;
@@ -760,7 +766,7 @@ static PyObject* remmina_widget_pool_register_wrapper(PyObject* self, PyObject *
 	static char* kwlist[] = { "widget", NULL };
 	PyObject* widget;
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", &widget) && widget)
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &widget) && widget)
 	{
 		remmina_widget_pool_register((GtkWidget*)pygobject_get(widget));
 	}
@@ -772,15 +778,13 @@ static PyObject* rcw_open_from_file_full_wrapper(PyObject* self, PyObject *args,
 {
 	TRACE_CALL(__func__);
 	static char* kwlist[] = { "remminafile", "data", "handler", NULL };
-	PyPlugin* remminafile;
+	PyObject* pyremminafile;
 	PyObject* data;
-	guint handler;
 
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "OOOl", &remminafile, &data, &handler) &&
-		remminafile && remminafile->file_plugin && data)
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "OOO", kwlist, &pyremminafile, &data) && pyremminafile && data)
 	{
-		rcw_open_from_file_full(remminafile->file_plugin, NULL, (void*)data, handler);
+		rcw_open_from_file_full((RemminaFile*)pyremminafile, NULL, (void*)data, NULL);
 	}
 
 	return Py_None;
@@ -789,11 +793,12 @@ static PyObject* rcw_open_from_file_full_wrapper(PyObject* self, PyObject *args,
 static PyObject* remmina_public_get_server_port_wrapper(PyObject* self, PyObject *args, PyObject *kwargs)
 {
 	TRACE_CALL(__func__);
+
 	static char* kwlist[] = { "server", "defaultport", "host", "port", NULL };
 	gchar* server;
 	gint defaultport;
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "slsl", &server, &defaultport) && server)
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "slsl", kwlist, &server, &defaultport) && server)
 	{
 		gchar* host;
 		gint port;
@@ -826,9 +831,9 @@ static PyObject* remmina_protocol_widget_get_profile_remote_height_wrapper(PyObj
 	static char* kwlist[] = { "widget", NULL };
 	PyPlugin* plugin;
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", &plugin) && plugin && plugin->gp)
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &plugin) && plugin && plugin->gp)
 	{
-		remmina_protocol_widget_get_profile_remote_height(plugin->gp);
+		remmina_protocol_widget_get_profile_remote_height(plugin->gp->gp);
 	}
 
 	return Py_None;
@@ -840,9 +845,9 @@ static PyObject* remmina_protocol_widget_get_profile_remote_width_wrapper(PyObje
 	static char* kwlist[] = { "widget", NULL };
 	PyPlugin* plugin;
 
-	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", &plugin) && plugin && plugin->gp)
+	if (PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &plugin) && plugin && plugin->gp)
 	{
-		remmina_protocol_widget_get_profile_remote_width(plugin->gp);
+		remmina_protocol_widget_get_profile_remote_width(plugin->gp->gp);
 	}
 
 	return Py_None;

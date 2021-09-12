@@ -96,22 +96,22 @@
 
 static PyObject* protocol_widget_get_viewport(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_get_width(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_set_width(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_set_width(PyRemminaProtocolWidget* self, PyObject* var_width);
 static PyObject* protocol_widget_get_height(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_set_height(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_set_height(PyRemminaProtocolWidget* self, PyObject* var_height);
 static PyObject* protocol_widget_get_current_scale_mode(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_get_expand(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_set_expand(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_set_expand(PyRemminaProtocolWidget* self, PyObject* var_expand);
 static PyObject* protocol_widget_has_error(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_set_error(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_set_error(PyRemminaProtocolWidget* self, PyObject* var_msg);
 static PyObject* protocol_widget_is_closed(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_get_file(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_emit_signal(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_register_hostkey(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_emit_signal(PyRemminaProtocolWidget* self, PyObject* var_signal);
+static PyObject* protocol_widget_register_hostkey(PyRemminaProtocolWidget* self, PyObject* var_widget);
 static PyObject* protocol_widget_start_direct_tunnel(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_start_reverse_tunnel(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_start_reverse_tunnel(PyRemminaProtocolWidget* self, PyObject* var_local_port);
 static PyObject* protocol_widget_start_xport_tunnel(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_set_display(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_set_display(PyRemminaProtocolWidget* self, PyObject* var_display);
 static PyObject* protocol_widget_signal_connection_closed(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_signal_connection_opened(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_update_align(PyRemminaProtocolWidget* self, PyObject* args);
@@ -135,7 +135,7 @@ static PyObject* protocol_widget_panel_show_retry(PyRemminaProtocolWidget* self,
 static PyObject* protocol_widget_panel_show(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_panel_hide(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_ssh_exec(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_chat_open(PyRemminaProtocolWidget* self, PyObject* args);
+static PyObject* protocol_widget_chat_open(PyRemminaProtocolWidget* self, PyObject* var_name);
 static PyObject* protocol_widget_chat_close(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_chat_receive(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_send_keys_signals(PyRemminaProtocolWidget* self, PyObject* args);
@@ -155,7 +155,7 @@ static struct PyMethodDef python_protocol_widget_type_methods[] = {
 	{ "get_file", (PyCFunction)protocol_widget_get_file, METH_VARARGS, "" },
 	{ "emit_signal", (PyCFunction)protocol_widget_emit_signal, METH_VARARGS, "" },
 	{ "register_hostkey", (PyCFunction)protocol_widget_register_hostkey, METH_VARARGS, "" },
-	{ "start_direct_tunnel", (PyCFunctionWithKeywords)protocol_widget_start_direct_tunnel, METH_VARARGS | METH_KEYWORDS,
+	{ "start_direct_tunnel", (PyCFunction)protocol_widget_start_direct_tunnel, METH_VARARGS | METH_KEYWORDS,
 	  "" },
 	{ "start_reverse_tunnel", (PyCFunction)protocol_widget_start_reverse_tunnel, METH_VARARGS, "" },
 	{ "start_xport_tunnel", (PyCFunction)protocol_widget_start_xport_tunnel, METH_VARARGS, "" },
@@ -211,7 +211,7 @@ static PyObject* python_protocol_feature_new(PyTypeObject* type, PyObject* kws, 
 	return (PyObject*)self;
 }
 
-static int python_protocol_feature_init(PyRemminaProtocolWidget* self, PyObject* args, PyObject* kwds)
+static int python_protocol_feature_init(PyObject* self, PyObject* args, PyObject* kwds)
 {
 	return 0;
 }
@@ -372,7 +372,7 @@ static PyObject* protocol_widget_set_error(PyRemminaProtocolWidget* self, PyObje
 
 	if (var_msg && PyUnicode_Check(var_msg))
 	{
-		gchar* msg = PyUnicode_AsUTF8(var_msg);
+		const gchar* msg = PyUnicode_AsUTF8(var_msg);
 		remmina_protocol_widget_set_error(self->gp, msg);
 	}
 	else
@@ -424,7 +424,7 @@ static PyObject* protocol_widget_register_hostkey(PyRemminaProtocolWidget* self,
 
 	if (var_widget)
 	{
-		remmina_protocol_widget_register_hostkey(self->gp, pygobject_get(var_widget));
+		remmina_protocol_widget_register_hostkey(self->gp, (GtkWidget*)pygobject_get(var_widget));
 	}
 	else
 	{
@@ -475,7 +475,7 @@ static PyObject* protocol_widget_start_reverse_tunnel(PyRemminaProtocolWidget* s
 static gboolean xport_tunnel_init(RemminaProtocolWidget* gp, gint remotedisplay, const gchar* server, gint port)
 {
 	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
-	PyObject* result = PyObject_CallMethod(plugin, "xport_tunnel_init", "Oisi", gp, remotedisplay, server, port);
+	PyObject* result = PyObject_CallMethod(plugin->instance, "xport_tunnel_init", "Oisi", gp, remotedisplay, server, port);
 	return PyObject_IsTrue(result);
 }
 
@@ -555,7 +555,7 @@ static PyObject* protocol_widget_panel_auth(PyRemminaProtocolWidget* self, PyObj
 	SELF_CHECK();
 
 	gint pflags = 0;
-	gchar* title, default_username, default_password, default_domain, password_prompt;
+	gchar* title, *default_username, *default_password, *default_domain, *password_prompt;
 
 	if (PyArg_ParseTuple(args, "isssss", &pflags, &title, &default_username, &default_password, &default_domain, &password_prompt))
 	{
@@ -585,7 +585,7 @@ static PyObject* protocol_widget_panel_new_certificate(PyRemminaProtocolWidget* 
 {
 	TRACE_CALL(__func__);
 	SELF_CHECK();
-	gchar* subject, issuer, fingerprint;
+	gchar* subject, *issuer, *fingerprint;
 
 	if (PyArg_ParseTuple(args, "sss", &subject, &issuer, &fingerprint))
 	{
@@ -603,7 +603,7 @@ static PyObject* protocol_widget_panel_changed_certificate(PyRemminaProtocolWidg
 {
 	TRACE_CALL(__func__);
 	SELF_CHECK();
-	gchar* subject, issuer, new_fingerprint, old_fingerprint;
+	gchar* subject, *issuer, *new_fingerprint, *old_fingerprint;
 
 	if (PyArg_ParseTuple(args, "sss", &subject, &issuer, &new_fingerprint, &old_fingerprint))
 	{
@@ -762,18 +762,16 @@ static PyObject* protocol_widget_ssh_exec(PyRemminaProtocolWidget* self, PyObjec
 	return Py_None;
 }
 
-static gboolean _on_send_callback_wrapper(RemminaProtocolWidget* gp, const gchar* text)
+static void _on_send_callback_wrapper(RemminaProtocolWidget* gp, const gchar* text)
 {
 	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
-	PyObject* result = PyObject_CallMethod(plugin, "on_send", "Os", gp, text);
-	return PyObject_IsTrue(result);
+	PyObject_CallMethod(plugin->instance, "on_send", "Os", gp, text);
 }
 
-static gboolean _on_destroy_callback_wrapper(RemminaProtocolWidget* gp)
+static void _on_destroy_callback_wrapper(RemminaProtocolWidget* gp)
 {
 	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
-	PyObject* result = PyObject_CallMethod(plugin, "on_destroy", "O", gp);
-	return PyObject_IsTrue(result);
+	PyObject_CallMethod(plugin->instance, "on_destroy", "O", gp);
 }
 
 static PyObject* protocol_widget_chat_open(PyRemminaProtocolWidget* self, PyObject* var_name)
@@ -781,7 +779,7 @@ static PyObject* protocol_widget_chat_open(PyRemminaProtocolWidget* self, PyObje
 	TRACE_CALL(__func__);
 	SELF_CHECK();
 
-	if (var_name, PyUnicode_Check(var_name))
+	if (PyUnicode_Check(var_name))
 	{
 		remmina_protocol_widget_chat_open(self
 			->gp, PyUnicode_AsUTF8(var_name), _on_send_callback_wrapper, _on_destroy_callback_wrapper);
@@ -830,8 +828,9 @@ static PyObject* protocol_widget_send_keys_signals(PyRemminaProtocolWidget* self
 	guint* keyvals;
 	int length;
 	GdkEventType event_type;
+	PyObject* widget;
 
-	if (PyArg_ParseTuple(args, "sii", &keyvals, &length, &event_type))
+	if (PyArg_ParseTuple(args, "Osii", &widget, &keyvals, &length, &event_type) && widget && keyvals)
 	{
 		if (event_type < GDK_NOTHING || event_type >= GDK_EVENT_LAST)
 		{
@@ -840,7 +839,7 @@ static PyObject* protocol_widget_send_keys_signals(PyRemminaProtocolWidget* self
 		}
 		else
 		{
-			remmina_protocol_widget_send_keys_signals(self->gp, keyvals, length, event_type);
+			remmina_protocol_widget_send_keys_signals((GtkWidget*)widget, keyvals, length, event_type);
 		}
 	}
 	else

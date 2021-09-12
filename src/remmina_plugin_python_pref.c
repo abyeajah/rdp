@@ -12,6 +12,8 @@ GPtrArray* plugin_map;
  */
 void remmina_plugin_python_pref_init(void)
 {
+	TRACE_CALL(__func__);
+
 	plugin_map = g_ptr_array_new();
 }
 
@@ -20,36 +22,23 @@ void remmina_plugin_python_pref_init(void)
  */
 GtkWidget* remmina_plugin_python_pref_get_pref_body_wrapper(RemminaPrefPlugin* instance)
 {
-	PyPlugin* plugin = NULL;
-	guint index = 0;
-	for (int i = 0; i < plugin_map->len; ++i)
-	{
-		PyPlugin* tmp = (PyPlugin*)g_ptr_array_index(plugin_map, i);
-		if (!tmp->generic_plugin || !tmp->generic_plugin->name)
-			continue;
-		if (g_str_equal(instance->name, tmp->generic_plugin->name))
-		{
-			plugin = tmp;
-		}
-	}
+	TRACE_CALL(__func__);
 
-	if (!plugin)
-	{
-		g_printerr("[%s:%d]: No plugin named %s!\n", __FILE__, __LINE__, instance->name);
-		return NULL;
-	}
+	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
 
-	PyObject* result = CallPythonMethod(plugin->instance, "entry_func", plugin->instance);
+	PyObject* result = CallPythonMethod(plugin->instance, "entry_func", "O", plugin->instance);
 	if (result == Py_None)
 	{
 		return NULL;
 	}
 
-	return pygobject_get(result);
+	return (GtkWidget*)pygobject_get(result);
 }
 
 RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyPlugin* plugin)
 {
+	TRACE_CALL(__func__);
+
 	PyObject* instance = plugin->instance;
 
 	if (!remmina_plugin_python_check_attribute(instance, ATTR_NAME))
@@ -68,9 +57,9 @@ RemminaPlugin* remmina_plugin_python_create_pref_plugin(PyPlugin* plugin)
 	remmina_plugin->get_pref_body = remmina_plugin_python_pref_get_pref_body_wrapper;
 
 	plugin->pref_plugin = remmina_plugin;
-	plugin->generic_plugin = remmina_plugin;
+	plugin->generic_plugin = (RemminaPlugin*)remmina_plugin;
 
 	g_ptr_array_add(plugin_map, plugin);
 
-	return remmina_plugin;
+	return (RemminaPlugin*)remmina_plugin;
 }

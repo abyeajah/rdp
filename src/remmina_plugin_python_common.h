@@ -32,6 +32,15 @@
  *
  */
 
+/**
+ * @file 	remmina_plugin_python_common.h
+ *
+ * @brief	Contains functions and constants that are commonly used throughout the Python plugin implementation.
+ *
+ * @details	These functions should not be used outside of the Python plugin implementation, since everything is intended
+ * 			to be used with the Python engine.
+ */
+
 #pragma once
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +54,11 @@
 #include <glib.h>
 #include <Python.h>
 #include <structmember.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include "pygobject.h"
+#pragma GCC diagnostic pop
 
 #include "remmina/plugin.h"
 #include "config.h"
@@ -97,11 +110,7 @@ extern const gchar* ATTR_INIT_ORDER;
  * @details This struct is responsible to provide the same accessibility to the protocol widget for Python as for
  * native plugins.
  */
-typedef struct
-{
-	PyObject_HEAD
-	RemminaProtocolWidget* gp;
-} PyRemminaProtocolWidget;
+typedef struct { PyObject_HEAD RemminaProtocolWidget* gp; } PyRemminaProtocolWidget;
 
 /**
  * Maps an instance of a Python plugin to a Remmina one.
@@ -126,32 +135,32 @@ typedef struct
 // A P I
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 /**
  * Gets the result of the last python method call.
  */
 PyObject* remmina_plugin_python_last_result(void);
 
 /**
- * Sets the result of the last python method call.
- * @return Returns the passed result (it's done to be compatible with the CallPythonMethod macro).
+ * @brief	Sets the result of the last python method call.
+ *
+ * @return 	Returns the passed result (it's done to be compatible with the CallPythonMethod macro).
  */
 PyObject* remmina_plugin_python_last_result_set(PyObject* result);
 
 /**
- * Prints a log message to inform the user a python message has been called.
+ * @brief	Prints a log message to inform the user a python message has been called.
  *
- * @detail This method is called from the CALL_PYTHON macro if WITH_PYTHON_TRACE_CALLS is defined.
+ * @detail 	This method is called from the CALL_PYTHON macro if WITH_PYTHON_TRACE_CALLS is defined.
  *
- * @param instance The instance that contains the called method.
- * @param method The name of the method called.
+ * @param 	instance The instance that contains the called method.
+ * @param 	method The name of the method called.
  */
 void remmina_plugin_python_log_method_call(PyObject* instance, const gchar* method);
 
 /**
- * Checks if an error has occurred and prints it.
+ * @brief 	Checks if an error has occurred and prints it.
  *
- * @return Returns TRUE if an error has occurred.
+ * @return 	Returns TRUE if an error has occurred.
  */
 gboolean remmina_plugin_python_check_error(void);
 
@@ -164,33 +173,45 @@ gboolean remmina_plugin_python_check_error(void);
  *
  * @return The value attribute as long.
  */
-long remmina_plugin_python_get_attribute_long(PyObject* instance, gchar* attr_name, long def);
+long remmina_plugin_python_get_attribute_long(PyObject* instance, const gchar* attr_name, long def);
 
 /**
- * Checks if a given attribute exists.
+ * @brief 	Checks if a given attribute exists.
  *
- * @param instance The object to check for the attribute.
- * @param attr_name The name of the attribute to check.
+ * @param 	instance The object to check for the attribute.
+ * @param 	attr_name The name of the attribute to check.
  *
- * @return Returns TRUE if the attribute exists.
+ * @return 	Returns TRUE if the attribute exists.
  */
 gboolean remmina_plugin_python_check_attribute(PyObject* instance, const gchar* attr_name);
 
 /**
- * Allocates memory and checks for errors before returning.
+ * @brief 	Allocates memory and checks for errors before returning.
  *
- * @param bytes Amount of bytes to allocate.
+ * @param 	bytes Amount of bytes to allocate.
  *
- * @return Address to the allocated memory.
+ * @return 	Address to the allocated memory.
  */
 void* remmina_plugin_python_malloc(int bytes);
 
 /**
- * Copies a string from a Python object to a new point in memory.
- * @param string 	The python object, containing the string to copy.
- * @param len		The length of the string to copy.
- * @return A gchar pointer to the new copy of the string.
+ * @biref 	Copies a string from a Python object to a new point in memory.
+ *
+ * @param 	string 	The python object, containing the string to copy.
+ * @param 	len		The length of the string to copy.
+ *
+ * @return 	A gchar pointer to the new copy of the string.
  */
 gchar* remmina_plugin_python_copy_string_from_python(PyObject* string, Py_ssize_t len);
+
+/**
+ * @brief	Tries to find the Python plugin matching to the given instance of RemminaPlugin.
+ *
+ * @param 	plugin_map An array of PyPlugin pointers to search.
+ * @param 	instance The RemminaPlugin instance to find the correct PyPlugin instance for.
+ *
+ * @return	A pointer to a PyPlugin instance if successful. Otherwise NULL is returned.
+ */
+PyPlugin* remmina_plugin_python_get_plugin(GPtrArray* plugin_map, RemminaPlugin* instance);
 
 G_END_DECLS

@@ -161,43 +161,48 @@ RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin)
 	Py_ssize_t len = PyList_Size(list);
 	if (len)
 	{
-		remmina_plugin->basic_settings = (RemminaProtocolSetting*)malloc(sizeof(RemminaProtocolSetting) * len);
-		memset(&remmina_plugin->basic_settings[len], 0, sizeof(RemminaProtocolSetting));
+		RemminaProtocolSetting* basic_settings = (RemminaProtocolSetting*)malloc(sizeof(RemminaProtocolSetting) * len);
+		memset(&basic_settings[len], 0, sizeof(RemminaProtocolSetting));
 
 		for (Py_ssize_t i = 0; i < len; ++i)
 		{
-			RemminaProtocolSetting* dest = remmina_plugin->basic_settings + i;
+			RemminaProtocolSetting* dest = basic_settings + i;
 			remmina_plugin_python_to_protocol_setting(dest, PyList_GetItem(list, i));
 		}
+
+		remmina_plugin->basic_settings = basic_settings;
 	}
 
 	list = PyObject_GetAttrString(instance, "advanced_settings");
 	len = PyList_Size(list);
 	if (len)
 	{
-		remmina_plugin->advanced_settings =
-			(RemminaProtocolSetting*)malloc(sizeof(RemminaProtocolSetting) * (len + 1));
-		memset(&remmina_plugin->advanced_settings[len], 0, sizeof(RemminaProtocolSetting));
+		RemminaProtocolSetting* advanced_settings = (RemminaProtocolSetting*)malloc(sizeof(RemminaProtocolSetting) * (len + 1));
+		memset(&advanced_settings[len], 0, sizeof(RemminaProtocolSetting));
 
 		for (Py_ssize_t i = 0; i < len; ++i)
 		{
-			RemminaProtocolSetting* dest = remmina_plugin->advanced_settings + i;
+			RemminaProtocolSetting* dest = advanced_settings + i;
 			remmina_plugin_python_to_protocol_setting(dest, PyList_GetItem(list, i));
 		}
+
+		remmina_plugin->advanced_settings = advanced_settings;
 	}
 
 	list = PyObject_GetAttrString(instance, "features");
 	len = PyList_Size(list);
 	if (len)
 	{
-		remmina_plugin->features = (RemminaProtocolFeature*)malloc(sizeof(RemminaProtocolFeature) * (len + 1));
-		memset(&remmina_plugin->features[len], 0, sizeof(RemminaProtocolFeature));
+		RemminaProtocolFeature* features = (RemminaProtocolFeature*)malloc(sizeof(RemminaProtocolFeature) * (len + 1));
+		memset(&features[len], 0, sizeof(RemminaProtocolFeature));
 
 		for (Py_ssize_t i = 0; i < len; ++i)
 		{
-			RemminaProtocolFeature* dest = remmina_plugin->features + i;
+			RemminaProtocolFeature* dest = features + i;
 			remmina_plugin_python_to_protocol_feature(dest, PyList_GetItem(list, i));
 		}
+
+		remmina_plugin->features = features;
 	}
 
 	remmina_plugin->ssh_setting = (RemminaProtocolSSHSetting)remmina_plugin_python_get_attribute_long(instance,
@@ -216,23 +221,24 @@ RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin)
 
 
 	plugin->protocol_plugin = remmina_plugin;
-	plugin->generic_plugin = remmina_plugin;
+	plugin->generic_plugin = (RemminaPlugin*)remmina_plugin;
 
 	g_ptr_array_add(plugin_map, plugin);
 
-	return remmina_plugin;
+	return (RemminaPlugin*)remmina_plugin;
 }
 
 PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp)
 {
 	static PyPlugin* cached_plugin = NULL;
 	static RemminaProtocolWidget* cached_widget = NULL;
+
 	if (gp == cached_widget)
 	{
 		return cached_plugin;
 	}
-	guint index = 0;
-	for (int i = 0; i < plugin_map->len; ++i)
+
+	for (gint i = 0; i < plugin_map->len; ++i)
 	{
 		PyPlugin* plugin = (PyPlugin*)g_ptr_array_index(plugin_map, i);
 		if (!plugin->generic_plugin || !plugin->generic_plugin->name)
@@ -244,6 +250,8 @@ PyPlugin* remmina_plugin_python_module_get_plugin(RemminaProtocolWidget* gp)
 			return plugin;
 		}
 	}
+
 	g_printerr("[%s:%d]: No plugin named %s!\n", __FILE__, __LINE__, gp->plugin->name);
+
 	return NULL;
 }

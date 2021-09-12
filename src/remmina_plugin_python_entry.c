@@ -55,47 +55,37 @@
  */
 GPtrArray* plugin_map;
 
-static const gchar* CREATE_ENTRY_PLUGIN_ERROR_FMT = "Unable to create entry plugin. Aborting!\n";
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // A P I
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void remmina_plugin_python_entry_init(void)
 {
+	TRACE_CALL(__func__);
+
 	plugin_map = g_ptr_array_new();
 }
 
 void remmina_plugin_python_entry_entry_func_wrapper(RemminaEntryPlugin* instance)
 {
-	PyPlugin* plugin = NULL;
-	guint index = 0;
-	for (int i = 0; i < plugin_map->len; ++i)
+	TRACE_CALL(__func__);
+
+	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
+	if (plugin)
 	{
-		PyPlugin* tmp = (PyPlugin*)g_ptr_array_index(plugin_map, i);
-		if (!tmp->generic_plugin || !tmp->generic_plugin->name)
-			continue;
-		if (g_str_equal(instance->name, tmp->generic_plugin->name))
-		{
-			plugin = tmp;
-		}
+		CallPythonMethod(plugin->instance, "entry_func", NULL);
 	}
-
-	if (!plugin) {
-		g_printerr("[%s:%d]: No plugin named %s!\n", __FILE__, __LINE__, instance->name);
-		return;
-	}
-
-	CallPythonMethod(plugin->instance, "entry_func", NULL);
 }
 
 RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* plugin)
 {
+	TRACE_CALL(__func__);
+
 	PyObject* instance = plugin->instance;
 
 	if (!remmina_plugin_python_check_attribute(instance, ATTR_NAME))
 	{
-		g_printerr(CREATE_ENTRY_PLUGIN_ERROR_FMT);
+		g_printerr("Unable to create entry plugin. Aborting!\n");
 		return NULL;
 	}
 
@@ -109,9 +99,9 @@ RemminaPlugin* remmina_plugin_python_create_entry_plugin(PyPlugin* plugin)
 	remmina_plugin->entry_func = remmina_plugin_python_entry_entry_func_wrapper;
 
 	plugin->entry_plugin = remmina_plugin;
-	plugin->generic_plugin = remmina_plugin;
+	plugin->generic_plugin = (RemminaPlugin*)remmina_plugin;
 
 	g_ptr_array_add(plugin_map, plugin);
 
-	return remmina_plugin;
+	return (RemminaPlugin*)remmina_plugin;
 }
