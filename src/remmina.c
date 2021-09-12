@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
 				"\n"
 				"To quick connect using a URI along with an encrypted password:\n"
 				"\n"
-				"\tremmina -c rdp://username:encrypted-password@server\n"
+				"\tremmina -c rdp://username:close_connectionencrypted-password@server\n"
 				"\tremmina -c vnc://username:encrypted-password@server\n"
 				"\tremmina -c vnc://server?VncUsername=username\\&VncPassword=encrypted-password\n"
 				"\n"

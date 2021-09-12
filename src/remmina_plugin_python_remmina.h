@@ -35,8 +35,13 @@
 /**
  * @file 	remmina_plugin_python_remmina.h
  *
- * @brief	Contains the implementation of the Python module 'remmina', provided to interface with the application from
+ * @brief 	Contains the implementation of the Python module 'remmina', provided to interface with the application from
  * 			the Python plugin source.
+ *
+ * @detail 	In contrast to the wrapper functions that exist in the plugin specialisation files (e.g.
+ * 			remmina_plugin_python_protocol.c or remmina_plugin_python_entry.c), this file contains the API for the
+ * 			communication in the direction, from Python to Remmina. This means, if in the Python plugin a function
+ * 			is called, that is defined in Remmina, C code, at least in this file, is executed.
  */
 
 #pragma once

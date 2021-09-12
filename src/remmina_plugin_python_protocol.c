@@ -87,6 +87,7 @@ gboolean remmina_protocol_open_connection_wrapper(RemminaProtocolWidget* gp)
 	}
 }
 
+
 gboolean remmina_protocol_close_connection_wrapper(RemminaProtocolWidget* gp)
 {
 	TRACE_CALL(__func__);
@@ -127,6 +128,20 @@ gboolean remmina_protocol_get_plugin_screenshot_wrapper(RemminaProtocolWidget* g
 	PyPlugin* py_plugin = remmina_plugin_python_module_get_plugin(gp);
 	PyObject* result = CallPythonMethod(py_plugin->instance, "get_plugin_screenshot", "O", py_plugin->gp);
 	return result == Py_True;
+}
+
+gboolean remmina_protocol_map_event_wrapper(RemminaProtocolWidget* gp)
+{
+	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
+	PyObject* result = CallPythonMethod(plugin->instance, "map_event", "O", plugin->gp);
+	return PyBool_Check(result) && result == Py_True;
+}
+
+gboolean remmina_protocol_unmap_event_wrapper(RemminaProtocolWidget* gp)
+{
+	PyPlugin* plugin = remmina_plugin_python_module_get_plugin(gp);
+	PyObject* result = CallPythonMethod(plugin->instance, "unmap_event", "O", plugin->gp);
+	return PyBool_Check(result) && result == Py_True;
 }
 
 RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin)
@@ -219,6 +234,8 @@ RemminaPlugin* remmina_plugin_python_create_protocol_plugin(PyPlugin* plugin)
 	remmina_plugin->get_plugin_screenshot =
 		remmina_protocol_get_plugin_screenshot_wrapper;                               // Screenshot support unavailable
 
+	remmina_plugin->map_event = remmina_protocol_map_event_wrapper;
+	remmina_plugin->unmap_event = remmina_protocol_unmap_event_wrapper;
 
 	plugin->protocol_plugin = remmina_plugin;
 	plugin->generic_plugin = (RemminaPlugin*)remmina_plugin;

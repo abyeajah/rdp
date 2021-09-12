@@ -73,6 +73,7 @@ static PyTypeObject python_remmina_file_type = {
 PyRemminaFile* remmina_plugin_python_remmina_file_to_python(RemminaFile* file)
 {
 	TRACE_CALL(__func__);
+
 	PyRemminaFile* result = PyObject_New(PyRemminaFile, &python_remmina_file_type);
 	result->file = file;
 	Py_INCREF(result);
@@ -81,11 +82,15 @@ PyRemminaFile* remmina_plugin_python_remmina_file_to_python(RemminaFile* file)
 
 static PyObject* file_get_path(PyRemminaFile* self, PyObject* args)
 {
+	TRACE_CALL(__func__);
+
 	return Py_BuildValue("s", remmina_file_get_filename(self->file));
 }
 
 static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds)
 {
+	TRACE_CALL(__func__);
+
 	static gchar* keyword_list[] = { "key", "value" };
 	gchar* key;
 	PyObject* value;
@@ -116,6 +121,8 @@ static PyObject* file_set_setting(PyRemminaFile* self, PyObject* args, PyObject*
 
 static PyObject* file_get_setting(PyRemminaFile* self, PyObject* args, PyObject* kwds)
 {
+	TRACE_CALL(__func__);
+
 	static gchar* keyword_list[] = { "key", "default" };
 	gchar* key;
 	PyObject* def;
@@ -146,6 +153,8 @@ static PyObject* file_get_setting(PyRemminaFile* self, PyObject* args, PyObject*
 
 static PyObject* file_get_secret(PyRemminaFile* self, PyObject* key)
 {
+	TRACE_CALL(__func__);
+
 	static const gchar* keyword_list[] = { "key", "default" };
 
 	if (key && PyUnicode_Check(key))
@@ -162,6 +171,8 @@ static PyObject* file_get_secret(PyRemminaFile* self, PyObject* key)
 
 static PyObject* file_unsave_passwords(PyRemminaFile* self, PyObject* args)
 {
+	TRACE_CALL(__func__);
+
 	if (self)
 	{
 		remmina_file_unsave_passwords(self->file);

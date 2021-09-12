@@ -11,17 +11,23 @@ GPtrArray* plugin_map;
  */
 void remmina_plugin_python_tool_init(void)
 {
+	TRACE_CALL(__func__);
+
 	plugin_map = g_ptr_array_new();
 }
 
 void remmina_plugin_python_tool_exec_func_wrapper(RemminaToolPlugin* instance)
 {
+	TRACE_CALL(__func__);
+
 	PyPlugin* plugin = remmina_plugin_python_get_plugin(plugin_map, (RemminaPlugin*)instance);
 	CallPythonMethod(plugin->instance, "exec_func", NULL);
 }
 
 RemminaPlugin* remmina_plugin_python_create_tool_plugin(PyPlugin* plugin)
 {
+	TRACE_CALL(__func__);
+
 	PyObject* instance = plugin->instance;
 
 	if (!remmina_plugin_python_check_attribute(instance, ATTR_NAME))
