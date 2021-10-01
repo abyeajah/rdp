@@ -1,6 +1,6 @@
 /*
  * Remmina - The GTK+ Remote Desktop Client
- * Copyright (C) 2014-2021 Antenore Gatta, Giovanni Panozzo
+ * Copyright (C) 2014-2021 Antenore Gatta, Giovanni Panozzo, Mathias Winterhalter (ToolsDevler)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@
  *  do not wish to do so, delete this exception statement from your
  *  version. *  If you delete this exception statement from all source
  *  files in the program, then also delete it here.
- *
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +42,7 @@
 #include "remmina_plugin_python_remmina.h"
 #include "remmina_plugin_python_protocol_widget.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // D E C L A R A T I O N S
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
