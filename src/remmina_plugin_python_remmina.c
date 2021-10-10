@@ -60,6 +60,8 @@
 #include "remmina_public.h"
 #include "remmina_masterthread_exec.h"
 
+#include "rcw.h"
+
 #include <string.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,6 +99,8 @@ static PyObject* remmina_plugin_python_show_dialog_wrapper(PyObject* self, PyObj
 static PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject* args);
 static PyObject* remmina_protocol_plugin_signal_connection_opened_wrapper(PyObject* self, PyObject* args);
 static PyObject* remmina_protocol_plugin_signal_connection_closed_wrapper(PyObject* self, PyObject* args);
+static PyObject* remmina_file_get_setting_wrapper(PyObject* self, PyObject* args, PyObject* kwargs);
+static PyObject* remmina_protocol_plugin_init_auth_wrapper(PyObject* self, PyObject* args, PyObject* kwargs);
 
 /**
  * Declares functions for the Remmina module. These functions can be called from Python and are wired to one of the
@@ -144,6 +148,10 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 	 * Calls remmina_pref_get_value and returns its result.
 	 */
 	{ "pref_get_value", (PyCFunction)remmina_pref_get_value_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
+    /**
+     * Returns the value of a setting stored in a RemminaFile.
+     */
+    {"file_get_setting", (PyCFunction)remmina_file_get_setting_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/**
 	 * Calls remmina_pref_get_scale_quality and returns its result.
@@ -213,6 +221,8 @@ static PyMethodDef remmina_python_module_type_methods[] = {
 
 	{ "protocol_plugin_signal_connection_closed", (PyCFunction)remmina_protocol_plugin_signal_connection_closed_wrapper,
 	  METH_VARARGS, NULL },
+
+    {"protocol_plugin_init_auth", (PyCFunction)remmina_protocol_plugin_init_auth_wrapper, METH_VARARGS | METH_KEYWORDS, NULL },
 
 	/* Sentinel */
 	{ NULL }
@@ -619,7 +629,7 @@ static PyObject* remmina_file_get_datadir_wrapper(PyObject* self, PyObject* plug
 	}
 
 	remmina_plugin_python_check_error();
-	return Py_None;
+	return result;
 }
 
 static PyObject* remmina_file_new_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
@@ -682,6 +692,29 @@ static PyObject* remmina_pref_get_value_wrapper(PyObject* self, PyObject* args, 
 
 	remmina_plugin_python_check_error();
 	return result;
+}
+
+static void print_all_settings (gpointer key,
+                                gpointer value,
+                                gpointer user_data) {
+    if (key) {
+        g_print("%s: %s\n", (const gchar*)key, value ? (const gchar*)value : "NULL");
+    }
+}
+
+static PyObject* remmina_file_get_setting_wrapper(PyObject* self, PyObject* args, PyObject* kwargs)
+{
+    TRACE_CALL(__func__);
+    PyObject* pygp = NULL;
+    if (!PyArg_ParseTuple(args, "O", &pygp) || !pygp)
+    {
+        g_printerr("Please provide the Remmina protocol widget instance!");
+        return Py_None;
+    }
+
+    RemminaProtocolWidget* gp = ((PyRemminaProtocolWidget*)pygp)->gp;
+
+    return Py_None;
 }
 
 static PyObject* remmina_pref_get_scale_quality_wrapper(PyObject* self, PyObject* plugin)
@@ -985,7 +1018,9 @@ PyObject* remmina_plugin_python_get_mainwindow_wrapper(PyObject* self, PyObject*
 
 static PyObject* remmina_protocol_plugin_signal_connection_closed_wrapper(PyObject* self, PyObject* args)
 {
-	PyObject* pygp = NULL;
+    TRACE_CALL(__func__);
+
+    PyObject* pygp = NULL;
 	if (!PyArg_ParseTuple(args, "O", &pygp) || !pygp)
 	{
 		g_printerr("Please provide the Remmina protocol widget instance!");
@@ -995,6 +1030,42 @@ static PyObject* remmina_protocol_plugin_signal_connection_closed_wrapper(PyObje
 	remmina_plugin_manager_service.protocol_plugin_signal_connection_closed(((PyRemminaProtocolWidget*)pygp)->gp);
 	return Py_None;
 }
+
+static PyObject* remmina_protocol_plugin_init_auth_wrapper(PyObject* module, PyObject* args, PyObject* kwds)
+{
+  TRACE_CALL(__func__);
+
+  static gchar* keyword_list[] = { "widget", "flags", "title", "default_username", "default_password", "default_domain", "password_prompt" };
+
+  PyRemminaProtocolWidget* self;
+  gint pflags = 0;
+  gchar* title, * default_username, * default_password, * default_domain, * password_prompt;
+
+  if (PyArg_ParseTupleAndKeywords(args, kwds, "Oisssss",  keyword_list, &self, &pflags, &title, &default_username,
+								  &default_password, &default_domain, &password_prompt))
+  {
+	if (pflags != 0 &&!(pflags & REMMINA_MESSAGE_PANEL_FLAG_USERNAME)
+		&& !(pflags & REMMINA_MESSAGE_PANEL_FLAG_USERNAME_READONLY)
+		&& !(pflags & REMMINA_MESSAGE_PANEL_FLAG_DOMAIN)
+		&& !(pflags & REMMINA_MESSAGE_PANEL_FLAG_SAVEPASSWORD))
+	{
+	  g_printerr("panel_auth(pflags, title, default_username, default_password, default_domain, password_prompt): "
+				 "%d is not a known value for RemminaMessagePanelFlags!\n", pflags);
+	}
+	else
+	{
+	  remmina_protocol_widget_panel_auth(self
+											 ->gp, pflags, title, default_username, default_password, default_domain, password_prompt);
+	}
+  }
+  else
+  {
+	g_printerr("panel_auth(pflags, title, default_username, default_password, default_domain, password_prompt): Error parsing arguments!\n");
+	PyErr_Print();
+  }
+  return Py_None;
+}
+
 
 static PyObject* remmina_protocol_plugin_signal_connection_opened_wrapper(PyObject* self, PyObject* args)
 {

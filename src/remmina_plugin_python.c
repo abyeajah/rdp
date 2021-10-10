@@ -130,10 +130,10 @@ gboolean remmina_plugin_python_load(RemminaPluginService* service, const gchar* 
 	}
 
 	PyObject* plugin_name = PyUnicode_DecodeFSDefault(filename);
-	free(filename);
 
 	if (!plugin_name)
 	{
+		free(filename);
 		g_printerr(ERR_CONVERT_PLUGIN_FILENAME_FMT, __FILE__, __LINE__);
 		return FALSE;
 	}
@@ -142,6 +142,7 @@ gboolean remmina_plugin_python_load(RemminaPluginService* service, const gchar* 
 	Py_ssize_t len = PyUnicode_AsWideChar(plugin_name, program_name, 0);
 	if (len <= 0)
 	{
+		free(filename);
 		g_printerr(ERR_FAILED_ALLOC_FMT, __FILE__, __LINE__, (sizeof(wchar_t) * len));
 		return FALSE;
 	}
@@ -149,6 +150,7 @@ gboolean remmina_plugin_python_load(RemminaPluginService* service, const gchar* 
 	program_name = (wchar_t*)remmina_plugin_python_malloc(sizeof(wchar_t) * len);
 	if (!program_name)
 	{
+		free(filename);
 		g_printerr(ERR_FAILED_ALLOC_FMT, __FILE__, __LINE__, (sizeof(wchar_t) * len));
 		return FALSE;
 	}
@@ -159,10 +161,12 @@ gboolean remmina_plugin_python_load(RemminaPluginService* service, const gchar* 
 
 	if (PyImport_Import(plugin_name))
 	{
+		free(filename);
 		return TRUE;
 	}
 
 	g_print(ERR_LOAD_PLUGIN, __FILE__, __LINE__, name);
 	PyErr_Print();
+	free(filename);
 	return FALSE;
 }

@@ -1,3 +1,5 @@
+
+import pyVNC
 import sys
 import remmina
 import enum
@@ -71,7 +73,22 @@ class Plugin:
 
     def open_connection(self, gp):
         print("[PyVNC.open_connection]: Called!")
-        pass
+        print("Conect to %s" % remmina.pref_get_value("password"))
+        connection_file = gp.get_file()
+        password = None
+
+
+        if password == None:
+            #dont_save_passwords = connection_file.get_setting("disablepasswordstoring", False)
+            ret = remmina.protocol_plugin_init_auth(widget=gp,
+                                              flags=0, #if dont_save_passwords else remmina.REMMINA_MESSAGE_PANEL_FLAG_SAVEPASSWORD,
+                                              title="Enter VNC password",
+                                              default_username="",
+                                              default_password="", #connection_file.get_setting("password", None),
+                                              default_domain="",
+                                              password_prompt="Enter VNC password")
+            
+            print("ret: %s" % "None" if ret is None else str(ret))
 
     def close_connection(self, gp):
         print("[PyVNC.close_connection]: Called!")

@@ -115,7 +115,6 @@ static PyObject* protocol_widget_signal_connection_opened(PyRemminaProtocolWidge
 static PyObject* protocol_widget_update_align(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_unlock_dynres(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_desktop_resize(PyRemminaProtocolWidget* self, PyObject* args);
-static PyObject* protocol_widget_panel_auth(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_panel_new_certificate(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_panel_changed_certificate(PyRemminaProtocolWidget* self, PyObject* args);
 static PyObject* protocol_widget_get_username(PyRemminaProtocolWidget* self, PyObject* args);
@@ -163,7 +162,6 @@ static struct PyMethodDef python_protocol_widget_type_methods[] = {
 	{ "update_align", (PyCFunction)protocol_widget_update_align, METH_VARARGS, "" },
 	{ "unlock_dynres", (PyCFunction)protocol_widget_unlock_dynres, METH_VARARGS, "" },
 	{ "desktop_resize", (PyCFunction)protocol_widget_desktop_resize, METH_VARARGS, "" },
-	{ "panel_auth", (PyCFunction)protocol_widget_panel_auth, METH_VARARGS | METH_KEYWORDS, "" },
 	{ "panel_new_certificate", (PyCFunction)protocol_widget_panel_new_certificate, METH_VARARGS | METH_KEYWORDS, "" },
 	{ "panel_changed_certificate", (PyCFunction)protocol_widget_panel_changed_certificate, METH_VARARGS | METH_KEYWORDS,
 	  "" },
@@ -536,37 +534,6 @@ static PyObject* protocol_widget_desktop_resize(PyRemminaProtocolWidget* self, P
 	return Py_None;
 }
 
-static PyObject* protocol_widget_panel_auth(PyRemminaProtocolWidget* self, PyObject* args)
-{
-	TRACE_CALL(__func__);
-	SELF_CHECK();
-
-	gint pflags = 0;
-	gchar* title, * default_username, * default_password, * default_domain, * password_prompt;
-
-	if (PyArg_ParseTuple(args, "isssss", &pflags, &title, &default_username, &default_password, &default_domain, &password_prompt))
-	{
-		if (pflags != REMMINA_MESSAGE_PANEL_FLAG_USERNAME
-			&& pflags != REMMINA_MESSAGE_PANEL_FLAG_USERNAME_READONLY
-			&& pflags != REMMINA_MESSAGE_PANEL_FLAG_DOMAIN
-			&& pflags != REMMINA_MESSAGE_PANEL_FLAG_SAVEPASSWORD)
-		{
-			g_printerr("panel_auth(pflags, title, default_username, default_password, default_domain, password_prompt): "
-					   "%d is not a known value for RemminaMessagePanelFlags!\n", pflags);
-		}
-		else
-		{
-			remmina_protocol_widget_panel_auth(self
-				->gp, pflags, title, default_username, default_password, default_domain, password_prompt);
-		}
-	}
-	else
-	{
-		g_printerr("panel_auth(pflags, title, default_username, default_password, default_domain, password_prompt): Error parsing arguments!\n");
-		PyErr_Print();
-	}
-	return Py_None;
-}
 
 static PyObject* protocol_widget_panel_new_certificate(PyRemminaProtocolWidget* self, PyObject* args)
 {

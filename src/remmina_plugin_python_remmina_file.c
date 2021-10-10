@@ -49,7 +49,7 @@ static void file_dealloc(PyObject* self)
 static PyMethodDef python_remmina_file_type_methods[] = {
 	{ "get_path", (PyCFunction)file_get_path, METH_NOARGS, "" },
 	{ "set_setting", (PyCFunction)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Set file setting" },
-	{ "get_setting", (PyCFunction)file_set_setting, METH_VARARGS | METH_KEYWORDS, "Get file setting" },
+	{ "get_setting", (PyCFunction)file_get_setting, METH_VARARGS | METH_KEYWORDS, "Get file setting" },
 	{ "get_secret", (PyCFunction)file_get_secret, METH_VARARGS, "Get secret file setting" },
 	{ "unsave_passwords", (PyCFunction)file_unsave_passwords },
 	{ NULL }
